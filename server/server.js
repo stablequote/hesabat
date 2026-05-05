@@ -9,15 +9,12 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const DB_URI = process.env.DB_URI;
-const DB_URI = process.env.DB_LOCAL;
+const DB_LOCAL = process.env.DB_LOCAL;
 
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(DB_LOCAL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(DB_LOCAL);
     console.log("✅ Connected to Database");
   } catch (error) {
     console.error("❌ Database Connection Error:", error.message);
