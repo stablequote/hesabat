@@ -12,6 +12,8 @@
   "dependencies": {
     "@mantine/core": "^7.17.8",
     "@mantine/dates": "^7.17.8",
+    "@mantine/emotion": "^7.17.8",
+    "@mantine/hooks": "^7.17.8",
     "@mantine/notifications": "^7.17.8",
     "@tabler/icons": "^3.29.0",
     "@tabler/icons-react": "^3.29.0",
