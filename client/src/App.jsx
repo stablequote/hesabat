@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useTranslation } from "react-i18next";
 import './App.css';
+import PrivateRoute from './pages/ProtectedRoute';
+import Login from './pages/Login';
+import UnAuthorized from './pages/UnAuthorized';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -16,7 +19,7 @@ function App() {
       <Router>
         <Routes>
             {/* <Route index  element={<Login />} /> */}
-            <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
+            {/* <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
               <Route path="/" element={<DashboardLayout changeLanguage={changeLanguage} value={i18n.language} />}>
                 <Route path="home" element={<Home />} />
                 <Route path="inventory" element={<Inventory />} />
@@ -31,7 +34,7 @@ function App() {
                 <Route path="cashout" element={<Cashout />} />
                 <Route path="ledger" element={<Ledger />} />
               </Route>
-            </Route>
+            </Route> */}
           {/* Default Route */}
           <Route path='/login' element={<Login />} />
           <Route path='/unauthorized' element={<UnAuthorized />} />
