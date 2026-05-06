@@ -11,6 +11,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const DB_URI = process.env.DB_URI;
 const DB_LOCAL = process.env.DB_LOCAL;
 
+const authRouter = require("./routes/user.route")
 
 const connectDB = async () => {
   try {
@@ -35,6 +36,9 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use("/uploads", express.static(path.join("uploads")));
 
 // routes
+app.use("/auth", authRouter)
+
+
 
 app.get("/test", (req, res) => {
     res.send("server is working")
