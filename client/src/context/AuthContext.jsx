@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { showNotification } from '@mantine/notifications';
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
@@ -8,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const BASE_URL = import.meta.env.VITE_URL;
+    const navigate = useNavigate();
 
     // useEffect(() => {
     //     axios.post(`${BASE_URL}/auth/login`)
@@ -16,11 +19,32 @@ export const AuthProvider = ({ children }) => {
     //         .finally(() => setLoading(false));
     // }, []);
 
+
     const login = async (credentials) => {
-        const res = await axios.post(`${BASE_URL}/auth/login`, credentials);
-        setUser(res.data.user);
-        return res.data.authToken;
-    };
+        const url = `${BASE_URL}/auth/login`
+        // const credentials = user;
+        setLoading(!loading)
+
+        try {
+            const res = await axios.post(url, credentials);
+
+            if(res.status === 200) {
+                localStorage.setItem("authToken", res.data.token);
+                localStorage.setItem("shiftEndTime", res.data.shiftEndTime);
+                localStorage.setItem("user", JSON.stringify(res.data.user));
+                setLoading(!loading)
+                navigate("/clients"); // Redirect to dashboard after login
+            }
+        } catch (error) {
+            showNotification({
+            title: "Login error!",
+            message: "Login error, check again",
+            color: "red"
+            })
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const logout = async () => {
         try {
