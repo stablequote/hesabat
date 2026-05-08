@@ -60,9 +60,8 @@ app.get("/test", (req, res) => {
     console.log("test is working!!")
 })
 // running the server
-app.listen(5006, () => {
-    console.log("server running on port 5006")
-    
+app.listen(PORT, () => {
+  console.log(`server running on port ${PORT}`)   
 })
 
 process.stdin.resume(); // Keeps the process open
