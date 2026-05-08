@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
+import { AppShell, Flex, Button, Group, Stack, Box, Text, Drawer, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
-import { AppShell, Flex, Button, Group, Stack, Box, Text, Drawer, Burger } from '@mantine/core';
 import AppNavbar from './Navbar';
 import DashboardHeader from './DashboardHeader';
 
@@ -40,26 +40,31 @@ function DashboardLayout({ changeLanguage, value }) {
   return (
     <AppShell
       padding="md"
-      styles={(theme) => ({
-        main: { backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0] },
-      })}
+      header={{ height: 60 }}
+      navbar={{ width: 250, breakpoint: 'sm' }}
+      footer={{ height: 60 }}
     >
-        <AppShell.Header>
-            <DashboardHeader changeLanguage={changeLanguage} value={value} shiftRemainingTime={remaining} />
-        </AppShell.Header>
+      <AppShell.Header>
+        <DashboardHeader
+          changeLanguage={changeLanguage}
+          value={value}
+          shiftRemainingTime={remaining}
+        />
+      </AppShell.Header>
 
-        <AppShell.Navbar>
-            <AppNavbar />
-        </AppShell.Navbar>
+      <AppShell.Navbar bg="#0e356d">
+        <AppNavbar />
+      </AppShell.Navbar>
 
-        <AppShell.Footer>
-            <Box height={60} p="xs">
-               <Text align="center">© 2026 codelab SD.</Text>
-          </Box>
-        </AppShell.Footer>
-        
+      <AppShell.Main>
         <Outlet />
+      </AppShell.Main>
 
+      <AppShell.Footer bg="#cec8c8">
+        <Box h={60} p="xs">
+          <Text ta="center">© 2026 codelab SD.</Text>
+        </Box>
+      </AppShell.Footer>
     </AppShell>
   );
 }
