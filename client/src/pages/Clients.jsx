@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader } from '@mantine/core'
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
@@ -6,7 +6,6 @@ import moment from 'moment'
 import { IconTicket } from '@tabler/icons-react';
 import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
-import { useMemo } from 'react';
 import TanStackTable from '../components/TanStackTable';
 
 export const clientsSeed = [
