@@ -10,8 +10,17 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 const DB_URI = process.env.DB_URI;
 const DB_LOCAL = process.env.DB_LOCAL;
+const PORT = process.env.port || 5006;
 
-const authRouter = require("./routes/user.route")
+// routes imports
+const authRouter = require("./routes/user.route");
+const vendorRouter = require("./routes/vendor.route");
+const clientRouter = require("./routes/client.route");
+const expenseRouter = require("./routes/expense.route");
+const productRouter = require("./routes/product.route");
+const inventoryRouter = require("./routes/inventory.route");
+const financeTransfersRouter = require("./routes/financeTransfer.route");
+const purchaseInvoiceRouter = require("./routes/purchaseInvoice.route");
 
 const connectDB = async () => {
   try {
@@ -37,9 +46,15 @@ app.use("/uploads", express.static(path.join("uploads")));
 
 // routes
 app.use("/auth", authRouter)
+app.use("/vendors", vendorRouter)
+app.use("/clients", clientRouter)
+app.use('/expenses', expenseRouter)
+app.use('/products', productRouter)
+app.use("/inventory", inventoryRouter)
+app.use('/transfers', financeTransfersRouter);
+app.use('/purchase-invoices', purchaseInvoiceRouter);
 
-
-
+// testing server route
 app.get("/test", (req, res) => {
     res.send("server is working")
     console.log("test is working!!")
