@@ -21,6 +21,7 @@ const productRouter = require("./routes/product.route");
 const inventoryRouter = require("./routes/inventory.route");
 const financeTransfersRouter = require("./routes/financeTransfer.route");
 const purchaseInvoiceRouter = require("./routes/purchaseInvoice.route");
+const saleInvoiceRouter = require("./routes/saleInvoice.route");
 
 const connectDB = async () => {
   try {
@@ -53,6 +54,7 @@ app.use('/products', productRouter)
 app.use("/inventory", inventoryRouter)
 app.use('/transfers', financeTransfersRouter);
 app.use('/purchase-invoices', purchaseInvoiceRouter);
+app.use('/sale-invoices', saleInvoiceRouter);
 
 // testing server route
 app.get("/test", (req, res) => {
