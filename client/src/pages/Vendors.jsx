@@ -8,14 +8,13 @@ import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
 
 function Vendors() {
-  const [ merchantsData, setMerchantsData ] = useState([])
+  const [vendorsData, setVendorsData] = useState([]);
   const [opened, setOpened] = useState(false);
-  const [merchantForm, setMerchantForm] = useState({
-      shopName: '',
-      ownerName: '',
-      phone: '',
-      location: '',
-      unitSalePrice: 0,
+  const [vendorForm, setVendorForm] = useState({
+    name: '',
+    vendorID: '',
+    location: '',
+    phone: '',
   })
   const [loading, setLoading] = useState(false);
 
@@ -56,7 +55,7 @@ function Vendors() {
             <Button
               mr="md"
               color="red"
-              onClick={() => handleDeleteMerchant(row)}
+              onClick={() => handleDeleteVendor(row)}
               // disabled={isDone}
               compact
             >
@@ -79,14 +78,14 @@ function Vendors() {
   };
 
   const handleChange = (field, value) => {
-    setMerchantForm((prev) => ({ ...prev, [field]: value }));
+    setVendorForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const fetchData = async (url) => {
     try {
       setLoading(true)
       const res = await axios.get(url);
-      setMerchantsData(res.data);
+      setVendorsData(res.data.vendor);
     } catch (error) {
       showNotification({
         title: "Error",
@@ -99,11 +98,11 @@ function Vendors() {
   };
   
   useEffect(() => {
-    const url = `${BASE_URL}/merchants/list`;
+    const url = `${BASE_URL}/vendors/list`;
     fetchData(url)
   }, [])
 
-  const submitMerchantForm = async () => {
+  const submitVendorForm = async () => {
     try {
       const url = `${BASE_URL}/merchants/create`
       console.log("URL", url)
@@ -127,13 +126,13 @@ function Vendors() {
     }
   }
 
-  const handleDeleteMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
+  const handleDeleteVendor = async (row) => {
+    const confirmDialog = window.confirm("هل أنت متأكد؟")
     if(!confirmDialog) return;
       try {
         const id = row.original._id
         console.log(id)
-        const url = `${BASE_URL}/merchants/delete/${id}`
+        const url = `${BASE_URL}/vendors/delete/${id}`
         const res = await axios.delete(url)
         if(res.status === 200) {
           showNotification({
@@ -151,13 +150,14 @@ function Vendors() {
       })
     }
   }
-  const handleEditMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
+
+  const handleEditVendor = async (row) => {
+    const confirmDialog = window.confirm("هل أنت متأكد؟")
     if(!confirmDialog) return;
       try {
         const id = row.original._id
         console.log(id)
-        const url = `${BASE_URL}/merchants/edit/${id}`
+        const url = `${BASE_URL}/vendors/edit/${id}`
         const res = await axios.put(url)
         if(res.status === 200) {
           showNotification({
@@ -193,11 +193,12 @@ function Vendors() {
         checkedRow={checkedRow}
         setCheckedRow={setCheckedRow}
       />
-      <AddClientModal
+      <AddVendorModal
         opened={opened} 
         setOpened={setOpened} 
-        merchantForm={merchantForm} 
-        setMerchantForm={setMerchantForm} 
+        vendorForm={vendorForm} 
+        setVendorForm={setVendorForm} 
+        submitVendorForm={submitVendorForm}
         handleChange={handleChange} 
         submitMerchantForm={submitMerchantForm}
       />
