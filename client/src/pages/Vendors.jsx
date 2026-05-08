@@ -3,9 +3,10 @@ import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader } from '@ma
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import moment from 'moment'
-import { IconTicket } from '@tabler/icons-react';
-import CustomTable from '../components/CustomTable'
-import AddClientModal from '../components/AddClientModal';
+import { IconPlusFilled, IconTicket } from '@tabler/icons-react';
+// import CustomTable from '../components/CustomTable'
+import AddVendorModal from '../components/AddVendorModal';
+import TanStackTable from '../components/TanStackTable';
 
 function Vendors() {
   const [vendorsData, setVendorsData] = useState([]);
@@ -180,8 +181,11 @@ function Vendors() {
 
   return (
     <Container size="100%">
-      <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Add Merchant</Button>
-      <CustomTable 
+      {/* <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Create Vendor</Button> */}
+      <ActionIcon mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>
+        <IconPlusFilled size={32} />
+      </ActionIcon>
+      {/* <CustomTable 
         columns={columns} 
         data={merchantsData}
         // renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
@@ -192,6 +196,18 @@ function Vendors() {
         setRowSelection={setRowSelection}
         checkedRow={checkedRow}
         setCheckedRow={setCheckedRow}
+      /> */}
+       <TanStackTable
+        data={vendorsData}
+        columns={columns}
+        renderRowActions={(row) => (
+          <>
+            <Button size="xs">Edit</Button>
+            <Button size="xs" color="red">
+              Delete
+            </Button>
+          </>
+        )}
       />
       <AddVendorModal
         opened={opened} 
