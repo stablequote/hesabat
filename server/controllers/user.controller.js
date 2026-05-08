@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model'); // Import User schema
 const StaffShift = require("../models/staffShit.model");
 
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+
 // User registration
 exports.register = async (req, res) => {
     try {
@@ -43,7 +45,7 @@ exports.login = async (req, res) => {
         if (user.role === "owner" || user.role === "manager") {
             const token = jwt.sign(
                 { id: user._id, role: user.role },
-                "lion64",
+                TOKEN_SECRET,
                 { expiresIn: '1d' }
             );
             return res.status(200).json({
@@ -76,7 +78,7 @@ exports.login = async (req, res) => {
 
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            "lion64",
+            TOKEN_SECRET,
             { expiresIn: '1d' }
         );
 
