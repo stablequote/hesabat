@@ -105,10 +105,20 @@ function Vendors() {
 
   const submitVendorForm = async () => {
     try {
-      const url = `${BASE_URL}/merchants/create`
-      console.log("URL", url)
-      console.log(merchantForm)
-      const res = await axios.post(url, merchantForm)
+      const url = `${BASE_URL}/vendors/create`
+    
+      const payload = {
+        name: vendorForm.name,
+        vendorID: vendorForm.vendorID,
+        contactDetails: {
+          phone: vendorForm.phone,
+          location: vendorForm.location
+        }
+      }
+
+      console.log(payload)
+
+      const res = await axios.post(url, payload)
       if(res.status === 201) {
         showNotification({
           title: 'Success',
@@ -116,6 +126,8 @@ function Vendors() {
           color: 'green'
         })
         setOpened(false)
+        // settting state
+        setVendorsData((prev) => [...prev, res.data.vendor])
       }
       window.location.reload()
     } catch (error) {
