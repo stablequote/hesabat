@@ -33,28 +33,37 @@ const paymentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const saleInvoiceSchema = new mongoose.Schema({
-    saleID: {
+    invoiceID: {
         type: String,
         unique: true,
         required: true,
     },
     products: [{
         product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true,
         },
-        name: String,   // snapshot
-        price: Number,  // selling price snapshot
-        quantity: Number,
+        quantity: {
+            type: Number,
+            required: true,
+        },
+
         unit: {
-        type: String,
-        enum: ["Kilo", "Barrel", "Piece"],
-        required: true,
+            type: String,
+            enum: ["Kilo", "Barrel", "Piece"],
+            required: true,
         },
-        unitPurchasePrice: {
-        type: Number,
-        required: true,
+
+        unitTotalPrice: {
+            type: Number,
+            required: true,
+        },
+        
+        productSnapShot: {
+            name: { type: String, required: true },
+            salePrice: { type: Number, required: true },
+            purchasePrice: { type: Number, required: true },
         },
     }],
     client: {
@@ -186,7 +195,7 @@ saleInvoiceSchema.pre("save", function (next) {
     } else {
         this.status = "paid";
     }
-    next();
+    // next();
 });
 
 module.exports = mongoose.model('saleInvoice', saleInvoiceSchema);
