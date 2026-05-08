@@ -28,28 +28,28 @@ function App() {
 
   return (
     <Router>
-    <AuthProvider>
+      <AuthProvider>
         <Routes>
-            {/* <Route index  element={<Login />} /> */}
-            <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
-              <Route path="/" element={<DashboardLayout changeLanguage={changeLanguage} value={i18n.language} />}>
-                {/* <Route path="home" element={<Home />} /> */}
-                <Route path="clients" element={<Clients />} />
-                <Route path="vendors" element={<Vendors />} />
-                <Route path="sale-invoices" element={<SaleInvoices />} />
-                <Route path="purchase-invoices" element={<PurchaseInvoices />} />
-                <Route path="ledger" element={<Ledger />} />
-                <Route path="expenses" element={<Expenses />} />
-                <Route path="products" element={<Products />} />
-                <Route path="cashout" element={<Cashout />} />
-              </Route>
+          {/* <Route index  element={<Login />} /> */}
+          <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
+            <Route path="/" element={<DashboardLayout changeLanguage={changeLanguage} value={i18n.language} />}>
+              {/* <Route path="home" element={<Home />} /> */}
+              <Route path="clients" element={<Clients />} />
+              <Route path="vendors" element={<Vendors />} />
+              <Route path="sale-invoices" element={<SaleInvoices />} />
+              <Route path="purchase-invoices" element={<PurchaseInvoices />} />
+              <Route path="ledger" element={<Ledger />} />
+              <Route path="expenses" element={<Expenses />} />
+              <Route path="products" element={<Products />} />
+              <Route path="cashout" element={<Cashout />} />
             </Route>
+          </Route>
           {/* Default Route */}
           <Route path='/login' element={<Login />} />
           <Route path='/unauthorized' element={<UnAuthorized />} />
         </Routes>
       </AuthProvider>
-      </Router>
+    </Router>
   )
 }
 
