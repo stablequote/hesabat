@@ -36,13 +36,12 @@ connectDB(); // Call the function
 
 // middleware
 app.use(cors({
-    // origin: [""],
-    origin: "*",
-    credentials: 'true',
+  // origin: [""],
+  origin: "*",
+  credentials: 'true',
 }))
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}))
-// Serve uploads folder
 app.use("/uploads", express.static(path.join("uploads")));
 
 // routes
@@ -58,9 +57,10 @@ app.use('/sale-invoices', saleInvoiceRouter);
 
 // testing server route
 app.get("/test", (req, res) => {
-    res.send("server is working")
-    console.log("test is working!!")
+  res.send("server is working")
+  console.log("test is working!!")
 })
+
 // running the server
 app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`)   
