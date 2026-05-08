@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useTranslation } from "react-i18next";
 import './App.css';
+
 import PrivateRoute from './pages/ProtectedRoute';
 import Login from './pages/Login';
 import UnAuthorized from './pages/UnAuthorized';
@@ -26,8 +27,8 @@ function App() {
   };
 
   return (
+    <Router>
     <AuthProvider>
-      <Router>
         <Routes>
             {/* <Route index  element={<Login />} /> */}
             <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
@@ -47,8 +48,8 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/unauthorized' element={<UnAuthorized />} />
         </Routes>
+      </AuthProvider>
       </Router>
-    </AuthProvider>
   )
 }
 
