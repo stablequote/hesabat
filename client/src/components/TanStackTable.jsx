@@ -84,10 +84,10 @@ const actionsColumn = {
   header: () => <Box ta="center">Actions</Box>,
 
   cell: ({ row }) => (
-    <Group gap="sm" justify="start" wrap="nowrap">
+    <Group gap="lg" justify="start" wrap="nowrap">
       
       {/* EDIT */}
-      <Tooltip label="Edit">
+      <Tooltip label="Edit" >
         <ActionIcon
           variant="light"
           color="blue"
