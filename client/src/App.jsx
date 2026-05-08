@@ -6,6 +6,17 @@ import './App.css';
 import PrivateRoute from './pages/ProtectedRoute';
 import Login from './pages/Login';
 import UnAuthorized from './pages/UnAuthorized';
+import Clients from './pages/Clients';
+import Vendors from './pages/Vendors';
+import SaleInvoices from './pages/SaleInvoices';
+import PurchaseInvoices from './pages/PurchaseInvoices';
+import Ledger from './pages/Ledger';
+import Expenses from './pages/Expenses';
+import Products from './pages/Products';
+import Cashout from './pages/Cashout';
+// import Clients from './pages/Clients';
+
+import DashboardLayout from './components/DashboardLayout';
 
 function App() {
   const { t, i18n } = useTranslation();
