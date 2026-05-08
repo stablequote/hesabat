@@ -188,9 +188,7 @@ function Vendors() {
       })
     }
   }
-
   
-
   return (
     <Container size="100%">
       {/* <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Create Vendor</Button> */}
@@ -199,7 +197,7 @@ function Vendors() {
       </ActionIcon>
       {/* <CustomTable 
         columns={columns} 
-        data={merchantsData}
+        data={vendorsData}
         // renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
         renderRowActions={customTableOptions.renderRowActions}
         // onRowSelectionChange={customTableOptions.onRowSelectionChange}
@@ -228,7 +226,6 @@ function Vendors() {
         setVendorForm={setVendorForm} 
         submitVendorForm={submitVendorForm}
         handleChange={handleChange} 
-        submitMerchantForm={submitMerchantForm}
       />
       {
         loading &&
