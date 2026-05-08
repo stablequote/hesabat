@@ -29,18 +29,19 @@ function Vendors() {
 
   const BASE_URL = import.meta.env.VITE_URL;
 
-  const columns = [
-      { accessorKey: "shopName", header: "Shop Name" },
-      { accessorKey: "ownerName", header: "Owner's Name" },
-      { accessorKey: "location", header: "Location" },
-      { accessorKey: "phone", header: "Phone" },
-      { accessorKey: "unitSalePrice", header: "Unit Price" },
-      { accessorKey: "createdAt", header: "Added on", 
-          Cell: ({ cell }) => (
-              <Box>{moment(cell.getValue()).format("DD-MM-YYYY h:mm a")}</Box>
-          )
-      },
-  ];
+  const columns = useMemo(() =>
+    [
+      { accessorKey: "name", header: "Vendor Name" },
+      { accessorKey: "vendorID", header: "Vendor ID" },
+      { accessorKey: "contactDetails.location", header: "Location" },
+      { accessorKey: "contactDetails.phone", header: "Phone" },
+      // { accessorKey: "createdAt", header: "Added on", 
+      //   Cell: ({ cell }) => (
+      //     <Box>{moment(cell.getValue()).format("DD-MM-YYYY h:mm a")}</Box>
+      //   )
+      // },
+    ]
+  )
 
   const customTableOptions = {
     renderRowActions: ({ row }) => {
