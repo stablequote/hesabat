@@ -4,10 +4,14 @@ exports.addVendor = async (req, res) => {
     try {
         const { name, vendorID, contactDetails } = req.body;
 
+        if(!name || contactDetails) {
+          res.status(404).json({ message: "vendor details must be submitted" })
+        }
+
         const newVendor = new Vendor({
-            name, 
-            vendorID, 
-            contactDetails
+          name, 
+          vendorID, 
+          contactDetails
         });
 
         await newVendor.save();
