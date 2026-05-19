@@ -6,7 +6,7 @@ import './App.css';
 
 import PrivateRoute from './pages/ProtectedRoute';
 import Login from './pages/Login';
-import UnAuthorized from './pages/UnAuthorized';
+import UnAuthorized from "./pages/Unauthorized";
 import Clients from './pages/Clients';
 import Vendors from './pages/Vendors';
 import SaleInvoices from './pages/SaleInvoices';
