@@ -157,5 +157,20 @@
     "Cash-Expenses-Today": "منصرفات اليوم النقدية",
     "Bankak-Expenses-Today": "منصرفات اليوم البنكية",
     "Total-Expenses-Today": "إجمالي المنصرفات اليوم",
-    "Cashout-Today": "بدل الكاش اليوم"
+    "Cashout-Today": "بدل الكاش اليوم",
+    "Remaining-Amount": "المبلغ المتبقي",
+    "OVERVIEW": "نظرة عامة",
+    "CLIENTS": "العملاء",
+    "VENDORS": "الموردون",
+    "SALE-INVOICES": "فواتير المبيعات",
+    "PURCHASE-INVOICES": "فواتير المشتروات",
+    "PRODUCTS": "المنتجات",
+    "Qty": "الكمية",
+    "Method": "طريقة الدفع",
+    "Amount": "المبلغ",
+    "Notes": "ملاحظات",
+    "Remaining": "المبلغ المتبقي",
+    "CLIENT": "العميل",
+    "Invoice-Date": "تاريخ الفاتورة",
+    "CREATE-INVOICE": "إنشاء فاتورة"
 }

@@ -156,5 +156,19 @@
     "Cash-Expenses-Today": "Cash Expenses Today",
     "Bankak-Expenses-Today": "Bankak Expenses Today",
     "Total-Expenses-Today": "Total Expenses Today",
-    "Cashout-Today": "Cash-out Today"
+    "Cashout-Today": "Cash-out Today",
+    "Remaining-Amount": "Remaining Amount",
+    "OVERVIEW": "Overview",
+    "CLIENTS": "Clients",
+    "VENDORS": "Vendors",
+    "SALE-INVOICES": "Sale Invoices",
+    "PURCHASE-INVOICES": "Purchase Invoices",
+    "PRODUCTS": "Product",
+    "Qty": "Qty",
+    "Method": "Method",
+    "Amount": "Amount",
+    "Notes": "Notes",
+    "Remaining": "Remaining",
+    "CLIENT": "Client",
+    "Invoice-Date": "Invoice Date"
 }
