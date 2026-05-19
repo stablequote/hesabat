@@ -203,7 +203,16 @@ const TanStackTable = ({ data,
       </DefaultToolbar>
 
       {/* TABLE */}
-      <Table striped highlightOnHover horizontalSpacing="xl" verticalSpacing="xl">
+      <Table
+        striped
+        highlightOnHover
+        horizontalSpacing="lg"
+        verticalSpacing={density}
+        styles={{
+          td: { padding: '14px 12px' },
+          th: { padding: '14px 12px' },
+        }}
+      >
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
