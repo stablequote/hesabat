@@ -136,9 +136,9 @@ exports.addInstallmentPayment = async (req, res) => {
     session.startTransaction();
 
     const { invoiceID } = req.params;
-    const payment = req.body;
+    const {payment} = req.body;
 
-    const invoice = await SaleInvoice.findOne({ invoiceID }).session(session);
+    const invoice = await SaleInvoice.findOne({ invoiceID }).populate("client", "fullName").session(session);
     if (!invoice) throw new Error("Invoice not found");
 
     const newPaid = invoice.paidAmount + payment.totalAmount;
@@ -247,9 +247,11 @@ exports.deleteSaleInvoice = async (req, res) => {
   try {
     session.startTransaction();
 
-    const { invoiceID } = req.params;
+    const { invoiceId } = req.params;
+    console.log("Invoice Id: ", invoiceId)
 
-    const invoice = await SaleInvoice.findOne({ invoiceID }).session(session);
+    const invoice = await SaleInvoice.findById(invoiceId).session(session);
+    console.log("Invoice: ", invoice)
     if (!invoice) throw new Error("Invoice not found");
 
     // 🔁 restore stock
