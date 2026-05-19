@@ -40,7 +40,7 @@ import {
   IconTrash
 } from "@tabler/icons-react";
 
-import { useState } from "react";
+import DefaultToolbar from "./DefaultToolbar";
 
 const TanStackTable = ({ data, columns, renderRowActions }) => {
   const [rowSelection, setRowSelection] = useState({});
@@ -156,80 +156,27 @@ const actionsColumn = {
         background: "white",
         }}
     >
-
-      {/* TOOLBAR */}
-      <Group justify="start" mb="sm">
-
-        <TextInput
-          placeholder="Search"
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          leftSection={<IconSearch size={16} />}
-          styles={{ input: { backgroundColor: "#f1f3f5", borderRadius: 4 } }}
-        />
-
-        <Group>
-
-          {/* Density (UI only for now) */}
-          {/* <Select
-            data={[
-              { value: "xs", label: "Compact" },
-              { value: "sm", label: "Comfortable" },
-              { value: "md", label: "Spacious" },
-            ]}
-            defaultValue="md"
-          /> */}
-
-          <Group gap="xs">
-                <Tooltip label="Compact">
-                    <ActionIcon
-                    variant={density === "xs" ? "filled" : "light"}
-                    onClick={() => setDensity("xs")}
-                    >
-                    <IconListNumbers size={16} />
-                    </ActionIcon>
-                </Tooltip>
-          </Group>
-
-          {/* Column visibility */}
-          <Menu>
-            <Menu.Target>
-               <Tooltip label="Show/Hide columns">
-                    <ActionIcon variant="light">
-                        <IconColumns size={18} />
-                    </ActionIcon>
-                </Tooltip>
-            </Menu.Target>
-
-            <Menu.Dropdown>
-              {table.getAllLeafColumns().map((col) => (
-                <Menu.Item key={col.id}>
-                  <Switch
-                    label={col.id}
-                    checked={col.getIsVisible()}
-                    onChange={col.getToggleVisibilityHandler()}
-                  />
-                </Menu.Item>
-              ))}
-            </Menu.Dropdown>
-          </Menu>
-
-          {/* FULLSCREEN */}
-        <Tooltip label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
-            <ActionIcon
-                variant="light"
-                onClick={() => setIsFullscreen((v) => !v)}
-            >
-                {isFullscreen ? (
-                <IconArrowsMinimize size={18} />
-                ) : (
-                <IconArrowsMaximize size={18} />
-                )}
-            </ActionIcon>
-        </Tooltip>
-
-        </Group>
-      </Group>
+      {/* Default toolbar */}
+      <DefaultToolbar 
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        density={density}
+        setDensity={setDensity}
+        table={table}
+        isFullscreen={isFullscreen}
+        setIsFullscreen={setIsFullscreen}
+      >
+        {/* {customToolbarOptions?.payInstallment?.(checkedRows)} */}
+        {Object.entries(customToolbarOptions || {}).map(
+          ([key, renderFn]) => (
+            <div key={key}>
+              {typeof renderFn === "function"
+                ? renderFn(checkedRows)
+                : renderFn}
+            </div>
+          )
+        )}
+      </DefaultToolbar>
 
       {/* TABLE */}
       <Table striped highlightOnHover horizontalSpacing="xl" verticalSpacing="xl">
