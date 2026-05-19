@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem("shiftEndTime", res.data.shiftEndTime);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
                 setLoading(!loading)
-                navigate("/clients"); // Redirect to dashboard after login
+                navigate("/overview"); // Redirect to dashboard after login
             }
         } catch (error) {
             showNotification({
