@@ -27,7 +27,7 @@ const syncRouter = require("./routes/sync.route");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(DB_LOCAL);
+    await mongoose.connect(DB_URI);
     console.log("✅ Connected to Database");
   } catch (error) {
     console.error("❌ Database Connection Error:", error.message);
