@@ -4,9 +4,9 @@ exports.createClient = async (req, res) => {
     try {
         const { fullName, contactDetails } = req.body;
 
-        if(!fullName || contactDetails) {
-            res.status(404).json({ message: "client details must be submitted" })
-        }
+        // if(!fullName || contactDetails) {
+        //     return res.status(400).json({ message: "client details must be submitted" })
+        // }
 
         const newClient = new Client({
             fullName, 
@@ -47,11 +47,12 @@ exports.getAllClients = async (req, res) => {
 };
 
 exports.deleteSingleClient = async (req, res) => {
-    const { id } = req.params;
-    console.log(req.params.ClientId)
+    const { clientId } = req.params;
+    console.log(req.params.clientId)
 
     try {
-        const foundClient = await Client.findByIdAndDelete(req.params.ClientId);
+        const foundClient = await Client.findByIdAndDelete(req.params.clientId);
+        console.log("Client: ", foundClient)
         if(!foundClient) {
             res.status(404).json({ message: "No Client found!" })
         }
