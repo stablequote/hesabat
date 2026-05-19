@@ -24,6 +24,15 @@ function AddExpenseModal({ open, setOpen, expenseForm, handleChange, handleSubmi
           />
           <Select 
             mt="md"
+            label="Category"
+            placeholder="Pick category"
+            required
+            data={["Salary", "Food", "Transportation", "Rent", "Governmental fees"]}
+            value={expenseForm.category}
+            onChange={(val) => handleChange("category", val)}
+          />
+          <Select 
+            mt="md"
             label="Payment Method"
             placeholder="Pick payment method"
             required
@@ -31,6 +40,18 @@ function AddExpenseModal({ open, setOpen, expenseForm, handleChange, handleSubmi
             value={expenseForm.paymentMethod}
             onChange={(val) => handleChange("paymentMethod", val)}
           />
+          {
+            expenseForm.paymentMethod === "Bankak" && (
+              <TextInput
+                label="Trx. Number"
+                placeholder="enter transaction number"
+                mt="md"
+                value={expenseForm.transactionNumber}
+                defaultValue={""}
+                onChange={(e) => handleChange("transactionNumber", e.currentTarget.value)}
+              />
+            )
+          }
           <Button mt="md" onClick={handleSubmit}>Create</Button>
         </Container>
       </Modal.Body>

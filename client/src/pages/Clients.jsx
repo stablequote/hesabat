@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader } from '@mantine/core'
+import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader, Group, ActionIcon } from '@mantine/core'
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import moment from 'moment'
-import { IconTicket } from '@tabler/icons-react';
+import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-react';
 import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
 import TanStackTable from '../components/TanStackTable';
@@ -50,12 +50,11 @@ export const clientsSeed = [
 function Clients() {
   const [clientsData, setClientsData] = useState([]);
   const [opened, setOpened] = useState(false);
-  const [merchantForm, setMerchantForm] = useState({
-    shopName: '',
-    ownerName: '',
+  const [clientForm, setClientForm] = useState({
+    name: '',
     phone: '',
     location: '',
-    unitSalePrice: 0,
+    email: "",
   })
   const [loading, setLoading] = useState(false);
 
@@ -108,7 +107,7 @@ function Clients() {
         );
       },
     },
-  ], [])
+  ])
 
   const customTableOptions = {
     renderRowActions: ({ row }) => {
@@ -146,7 +145,7 @@ function Clients() {
   };
 
   const handleChange = (field, value) => {
-    setMerchantForm((prev) => ({ ...prev, [field]: value }));
+    setClientForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const fetchData = async (url) => {
@@ -171,16 +170,25 @@ function Clients() {
     fetchData(url)
   }, [])
 
-  const submitMerchantForm = async () => {
+  const submitClientForm = async () => {
     try {
       const url = `${BASE_URL}/clients/create`
       console.log("URL", url)
-      console.log(merchantForm)
-      const res = await axios.post(url, merchantForm)
+      console.log(clientForm)
+
+      const payload = {
+        fullName: clientForm.name,
+        contactDetails: {
+          phone: clientForm.phone,
+          location: clientForm.location,
+          email: clientForm.email,
+        }
+      }
+      const res = await axios.post(url, payload)
       if(res.status === 201) {
         showNotification({
           title: 'Success',
-          message: 'Merchant created succesfully',
+          message: 'client created succesfully',
           color: 'green'
         })
         setOpened(false)
@@ -199,9 +207,9 @@ function Clients() {
     const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
     if(!confirmDialog) return;
       try {
-        const id = row.original._id
-        console.log(id)
-        const url = `${BASE_URL}/clients/delete/${id}`
+        const clientId = row.original._id
+        console.log(clientId)
+        const url = `${BASE_URL}/clients/delete/${clientId}`
         const res = await axios.delete(url)
         if(res.status === 200) {
           showNotification({
@@ -244,11 +252,51 @@ function Clients() {
     }
   }
 
-  
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon 
+            variant="light"
+            color="blue"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              handleActionClick(row.original._id)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              handleDeleteMerchant(row)
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+    
+  };
 
   return (
     <Container size="100%">
-      <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Add Merchant</Button>
+      <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Add Client</Button>
       {/* <CustomTable 
         columns={columns} 
         data={clientsSeed}
@@ -265,7 +313,7 @@ function Clients() {
 
       </Box> */}
       <TanStackTable
-        data={clientsSeed}
+        data={clientsData}
         columns={columns}
         renderRowActions={(row) => (
           <>
@@ -275,14 +323,17 @@ function Clients() {
             </Button>
           </>
         )}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
+        onSelectionChange={setCheckedRow}
       />
       <AddClientModal
         opened={opened} 
         setOpened={setOpened} 
-        merchantForm={merchantForm} 
-        setMerchantForm={setMerchantForm} 
+        clientForm={clientForm} 
+        setClientForm={setClientForm} 
         handleChange={handleChange} 
-        submitMerchantForm={submitMerchantForm}
+        submitClientForm={submitClientForm}
       />
       {
         loading &&

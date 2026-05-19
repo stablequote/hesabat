@@ -1,42 +1,35 @@
 import { Button, Flex, Group, Modal, NumberInput, Stack, Text, TextInput } from '@mantine/core'
 
-function AddClientModal({ opened, setOpened, merchantForm, handleChange, setMerchantForm, submitMerchantForm }) {
+function AddClientModal({ opened, setOpened, clientForm, handleChange, setClientForm, submitClientForm }) {
   return (
     <Modal size={800} opened={opened} withCloseButton>
         <Stack>
-          <TextInput label="Shop Name" 
-            placeholder="enter shop name"
-            value={merchantForm.shopName} 
-            onChange={(e) => handleChange("shopName", e.currentTarget.value)} 
-          />
-          <TextInput label="Owner's Name" 
-            placeholder="enter owner's name"
-            value={merchantForm.ownerName} 
-            onChange={(e) => handleChange("ownerName", e.currentTarget.value)} 
+          <TextInput label="Client Name" 
+            placeholder="enter client's name"
+            value={clientForm.name} 
+            onChange={(e) => handleChange("name", e.target.value)} 
           />
           <TextInput 
-            label="Merchant's Phone" 
+            label="Client's Phone" 
             placeholder="enter phone number" 
-            value={merchantForm.phone} 
-            onChange={(e) => handleChange("phone", e.currentTarget.value)} 
+            value={clientForm.phone} 
+            onChange={(e) => handleChange("phone", e.target.value)} 
           />
           <TextInput 
-            label="Merchant' Location" 
-            placeholder="enter merchant's location" 
-            value={merchantForm.location} 
-            onChange={(e) => handleChange("location", e.currentTarget.value)} 
+            label="Client Location" 
+            placeholder="enter client's location" 
+            value={clientForm.location} 
+            onChange={(e) => handleChange("location", e.target.value)} 
           />
-          <NumberInput 
-            label="Unit Sale Price" 
-            placeholder='enter unit sale price' 
-            value={merchantForm.unitSalePrice} 
-            onChange={(val) => handleChange("unitSalePrice", val)}
-            removeTrailingZeros
-            precision={3}
+          <TextInput 
+            label="Client's Email" 
+            placeholder="enter email address" 
+            value={clientForm.email} 
+            onChange={(e) => handleChange("email", e.target.value)} 
           />
         </Stack>
         <Flex mt="md" justify="space-between" >
-          <Button color="green" onClick={submitMerchantForm}>Create</Button>
+          <Button color="green" onClick={submitClientForm}>Create</Button>
           <Button color="gray" onClick={() => setOpened(false)}>Cancel</Button>
         </Flex>
     </Modal>

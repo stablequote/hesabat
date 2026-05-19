@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader, ActionIcon } from '@mantine/core'
+import { Box, Button, Container, Text, Flex, Tooltip, Center, Loader, ActionIcon, Group } from '@mantine/core'
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import moment from 'moment'
-import { IconPlusFilled, IconTicket } from '@tabler/icons-react';
+import { IconEdit, IconPlusFilled, IconTicket, IconTrash } from '@tabler/icons-react';
 // import CustomTable from '../components/CustomTable'
 import AddVendorModal from '../components/AddVendorModal';
 import TanStackTable from '../components/TanStackTable';
@@ -188,6 +188,69 @@ function Vendors() {
       })
     }
   }
+
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon
+            variant="light"
+            color="blue"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              handleEditVendor(row)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              handleDeleteVendor(row)
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+    exportClientsToExcel: (checkedRow) =>
+     <Button 
+        color="blue" 
+        // disabled={checkedRow?.length === 0} 
+        onClick={() => {
+          console.log("checked row: ", checkedRow)
+        }
+      }
+    >
+      Export
+    </Button>,
+    exportSelectedClientsToExcel: (checkedRow) =>
+     <Button 
+        color="blue" 
+        disabled={checkedRow?.length === 0} 
+        onClick={() => {
+          console.log("checked row: ", checkedRow)
+        }
+      }
+    >
+      Export Selected
+    </Button>,
+  };
   
   return (
     <Container size="100%">
@@ -195,18 +258,6 @@ function Vendors() {
       <ActionIcon mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>
         <IconPlusFilled size={32} />
       </ActionIcon>
-      {/* <CustomTable 
-        columns={columns} 
-        data={vendorsData}
-        // renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
-        renderRowActions={customTableOptions.renderRowActions}
-        // onRowSelectionChange={customTableOptions.onRowSelectionChange}
-        onRowClick={(row) => setSelectedResult(row)}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-        checkedRow={checkedRow}
-        setCheckedRow={setCheckedRow}
-      /> */}
        <TanStackTable
         data={vendorsData}
         columns={columns}
@@ -218,6 +269,8 @@ function Vendors() {
             </Button>
           </>
         )}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
       />
       <AddVendorModal
         opened={opened} 

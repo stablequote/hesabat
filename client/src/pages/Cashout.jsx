@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Text, Box, Button, Flex, Tooltip, Modal, Group } from '@mantine/core'
+import { Container, Text, Box, Button, Flex, Tooltip, Modal, Group, ActionIcon } from '@mantine/core'
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import moment from 'moment';
-import { IconTransfer, IconDoorExit, IconDownload, IconEdit, IconHistory, IconTrash } from '@tabler/icons-react';
+import { IconTransfer, IconDoorExit, IconDownload, IconEdit, IconHistory, IconTrash, IconFileExport } from '@tabler/icons-react';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import CashoutModal from '../components/CashoutModal';
 import CustomTable from '../components/CustomTable';
@@ -341,6 +341,59 @@ function Cashout() {
     },
   }
 
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon
+            variant="light"
+            color="blue"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onEdit?.(row.original)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onDelete?.(row.original)
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+    payInstallment: (checkedRow) =>
+      <Button 
+        color="green" 
+        // disabled={checkedRow?.length === 0} 
+        onClick={() => {
+          console.log("checked row: ", checkedRow)
+        }
+      }
+    >
+      Export
+      <IconFileExport />
+    </Button>,
+  };
+
   // const todayCashout = data.filter(transfer => isToday(transfer.createdAt));
   // console.log("Today Sales: ", todayCashout)
 
@@ -377,6 +430,9 @@ function Cashout() {
             </Button>
           </>
         )}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
+        onSelectionChange={setCheckedRow}
       />
       <CashoutModal 
         opened={cashModal}

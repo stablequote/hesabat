@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {Box, Button, Container, Flex, Group, Modal, Text, Tooltip} from '@mantine/core';
+import {ActionIcon, Box, Button, Center, Container, Flex, Group, Loader, Modal, Text, Tooltip} from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import axios, { Axios } from 'axios';
 import moment from 'moment';
-import { IconDoorExit, IconDownload, IconEdit, IconHistory, IconTrash } from '@tabler/icons-react';
+import { IconDoorExit, IconDownload, IconEdit, IconFileExport, IconHistory, IconMoneybagMinus, IconTrash } from '@tabler/icons-react';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import CustomTable from '../components/CustomTable';
 import AddExpenseModal from '../components/AddExpenseModal';
+import TanStackTable from '../components/TanStackTable';
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -15,8 +16,11 @@ function Expenses() {
   const [expenseForm, setExpenseForm] = useState({
     amount: 0,
     description: '',
+    category: '',
     paymentMethod: '',
+    transactionNumber: '',
   })
+  const [loading, setLoading] = useState(false);
 
   // copied from ahs ==> states for table management
   const [rowSelection, setRowSelection] = useState({});
@@ -31,12 +35,15 @@ function Expenses() {
   const [salesData, setSalesData] = useState([]);
 
   const { t } = useTranslation();
+
   const expensesColumns = useMemo(
     () => [
       { accessorKey: "description", header: t("Description"), size: 120},
       { accessorKey: "amount", header: t("Amount"), size: 120},
       { accessorKey: "paymentMethod", header: t("Payment-Method"), size: 30 },
-      { accessorKey: "createdBy.firstName", header: t("Created-By"), size: 30 },
+      { accessorKey: "transactionNumber", header: t("Transaction Number"), size: 30 },
+      { accessorKey: "category", header: t("Category"), size: 30 },
+      { accessorKey: "createdBy.fullName", header: t("Created-By"), size: 30 },
       // {
       //   accessorFn: (data) => moment(data.createdAt).format("DD-MM-YYYY h:mm a"),
       //   id: "createdAt",
@@ -47,34 +54,44 @@ function Expenses() {
         accessorKey: "createdAt",
         header: t("Date"),
         size: 100,
-        Cell: ({ cell }) => (
-          <Box
-            sx={{
-              borderRadius: "4px",
-              maxWidth: "9ch",
-              padding: "4px",
-            }}
-          >
-            {moment(cell.getValue()).format("DD-MM-YYYY hh:mm a")}
-          </Box>
-        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+  
+          return (
+            <Box
+              style={{
+                borderRadius: "4px",
+                padding: "4px",
+                whiteSpace: "nowrap",
+                direction: "ltr",
+                unicodeBidi: "embed",
+                textAlign: "right",
+              }}
+            >
+              {value ? moment(value).format("DD-MM-YYYY hh:mm") : "-"}
+            </Box>
+          );
+        },
       },
     ],
     [t]
   );
+
   const BASE_URL = import.meta.env.VITE_URL;
   const user = JSON.parse(localStorage.getItem("user"));
   
   const fetchInventoryData = async (url) => {
-      try {
-        const res = await axios.get(url);
-        console.log(res);
-        setExpenses(res.data);
-        console.log(res.data)
-      } catch (error) {
-        console.error('Error fetching inventory data:', error);
-        setSalesData([]); // Set to empty array in case of error
-      }
+    setLoading(true)
+    try {
+      const res = await axios.get(url);
+      setExpenses(res.data);
+      console.log(res.data)
+    } catch (error) {
+      console.error('Error fetching inventory data:', error);
+      setSalesData([]); // Set to empty array in case of error
+    } finally {
+      setLoading(false);
+    }
   };
   
   useEffect(() => {
@@ -96,34 +113,34 @@ function Expenses() {
     try {
       console.log("User ID: ", user?.id)
       const url = `${BASE_URL}/expenses/add`;
-      const res = await axios.post(url, {
+
+      const payload = {
         amount: expenseForm.amount,
         description: expenseForm.description,
+        category: expenseForm.category,
         paymentMethod: expenseForm.paymentMethod,
+        transactionNumber: expenseForm.transactionNumber,
         createdBy: user?.id,
-      })
+      }
+
+      const res = await axios.post(url, payload)
       if(res.status === 201) {
         showNotification({
           title: "Success",
           message: "Expense created successfully!",
           color: "green"
         })
-      } else {
-        showNotification({
-          title: "error",
-          message: "Error occured while creating expense!",
-          color: "red"
-        })
+        setExpenseForm({amount: 0, description: '', paymentMethod: ''})
+        setExpenses((prev) => [...prev, res.data.newExpense])
       }
     } catch (error) {
       showNotification({
-          title: "Error",
-          message: error,
-          color: "red"
-        })
+        title: "Error",
+        message: error,
+        color: "red"
+      })
     }
     setOpen(!open)
-    setExpenseForm({amount: 0, description: ''})
   }
 
   const isToday = (dateString) => {
@@ -337,17 +354,66 @@ function Expenses() {
     },
   }
 
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon
+            variant="light"
+            color="blue"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onEdit?.(row.original)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onDelete?.(row.original)
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+    payInstallment: (checkedRow) =>
+     <Button
+      color="green" 
+      // disabled={checkedRow?.length === 0}
+      onClick={() => {
+        setInstallmentModalOpen(true)
+        console.log("checked row: ", checkedRow)
+      }
+      }
+    >
+      Export
+      <IconFileExport />
+    </Button>,
+  };
+
   return (
     <Container size="100%">
-      <Flex justify="space-between" pr="xl">
-        <Button color='yellow' mb="xs" onClick={() => setOpen(!open)}>Add expense</Button>
-        <Text>Total expenses today: <strong>SDG {expensesSum.toLocaleString()}</strong></Text>
-      </Flex>
-      {/* <DataGrid 
-        columns={expensesColumns} 
-        data={expenses}
-      /> */}
-      <CustomTable
+      <ActionIcon color='yellow' size={32} mb="xs" onClick={() => setOpen(!open)}>
+        <IconMoneybagMinus />
+      </ActionIcon>
+      {/* <CustomTable
         columns={expensesColumns}
         data={expenses}
         renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
@@ -357,7 +423,28 @@ function Expenses() {
         setRowSelection={setRowSelection}
         checkedRow={checkedRow}
         setCheckedRow={setCheckedRow}
+      /> */}
+      <TanStackTable
+        data={expenses}
+        columns={expensesColumns}
+        renderRowActions={(row) => (
+          <>
+            <Button size="xs">Edit</Button>
+            <Button size="xs" color="red">
+              Delete
+            </Button>
+          </>
+        )}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
       />
+      {
+        loading && (
+          <Center>
+            <Loader size={32} color="green" variant="oval" />
+          </Center>
+        )
+      }
       <AddExpenseModal 
         open={open} 
         setOpen={setOpen} 
