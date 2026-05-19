@@ -22,7 +22,7 @@ exports.addProduct = async (req, res) => {
 
         res.status(201).json({ message: 'Product added successfully.', product: newProduct });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to add product.' });
+        res.status(500).json({ error: error.message });
     }
 };
 
