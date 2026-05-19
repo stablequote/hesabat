@@ -42,7 +42,15 @@ import {
 
 import DefaultToolbar from "./DefaultToolbar";
 
-const TanStackTable = ({ data, columns, renderRowActions }) => {
+const TanStackTable = ({ data, 
+  columns, 
+  renderRowActions, 
+  onRowClick, 
+  renderToolbar, 
+  actionsColumn,
+  customToolbarOptions,
+  onSelectionChange,
+}) => {
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -89,34 +97,40 @@ const TanStackTable = ({ data, columns, renderRowActions }) => {
 //     cell: ({ row }) => renderRowActions?.(row.original),
 //   };
 
-const actionsColumn = {
-  id: "actions",
-  header: () => <Box ta="center">Actions</Box>,
+  // const actionsColumn = {
+  //   id: "actions",
+  //   header: () => <Box ta="center">Actions</Box>,
 
-  cell: ({ row }) => (
-    <Group gap="lg" justify="start" wrap="nowrap">
-      
-      {/* EDIT */}
-      <Tooltip label="Edit" >
-        <ActionIcon
-          variant="light"
-          color="blue"
-          onClick={() => renderRowActions?.onEdit?.(row.original)}
-        >
-          <IconEdit size={26} />
-        </ActionIcon>
-      </Tooltip>
+  //   cell: ({ row }) => (
+  //     <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+  //       {/* EDIT */}
+  //       <Tooltip label="Edit" >
+  //         <ActionIcon
+  //           variant="light"
+  //           color="blue"
+  //           onClick={() => {
+  //             e.stopPropagation();
+  //             renderRowActions?.onEdit?.(row.original)
+  //           }}
+  //         >
+  //           <IconEdit size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
 
-      {/* DELETE */}
-      <Tooltip label="Delete">
-        <ActionIcon
-          variant="light"
-          color="red"
-          onClick={() => renderRowActions?.onDelete?.(row.original)}
-        >
-          <IconTrash size={26} />
-        </ActionIcon>
-      </Tooltip>
+  //       {/* DELETE */}
+  //       <Tooltip label="Delete">
+  //         <ActionIcon
+  //           variant="light"
+  //           color="red"
+  //           onClick={() => {
+  //             e.stopPropagation();
+  //             renderRowActions?.onDelete?.(row.original)
+  //           }}
+  //         >
+  //           <IconTrash size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
 
     </Group>
   ),
