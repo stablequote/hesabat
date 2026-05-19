@@ -78,7 +78,7 @@ const purchaseInvoiceSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["paid", "cancelled", "received"]
+        enum: ["paid", "cancelled", "received", "pending", "partial"]
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -89,14 +89,14 @@ const purchaseInvoiceSchema = mongoose.Schema({
     },
 }, {timestamps: true});
 
-purchaseInvoiceSchema.pre("save", function (next) {
-  // auto-update status and remaining balance
-  this.paidAmount = this.payments.reduce((sum, p) => sum + p.amount, 0);
-  this.remainingAmount = this.totalAmount - this.paidAmount;
-  if (this.paidAmount === 0) this.status = "unpaid";
-  else if (this.paidAmount < this.totalAmount) this.status = "partial";
-  else this.status = "paid";
-//   next();
-});
+// purchaseInvoiceSchema.pre("save", function (next) {
+//   // auto-update status and remaining balance
+//   this.paidAmount = this.payments.reduce((sum, p) => sum + p.amount, 0);
+//   this.remainingAmount = this.totalAmount - this.paidAmount;
+//   if (this.paidAmount === 0) this.status = "pending";
+//   else if (this.paidAmount < this.totalAmount) this.status = "partial";
+//   else this.status = "paid";
+// //   next();
+// });
 
 module.exports = mongoose.model('PurchaseInvoice', purchaseInvoiceSchema);

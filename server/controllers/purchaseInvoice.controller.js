@@ -325,9 +325,11 @@ exports.createPurchaseInvoice = async (req, res) => {
     let status = "partial";
 
     if (paidAmount === 0) {
-      status = "unpaid";
+      status = "pending";
     } else if (remainingAmount <= 0) {
       status = "paid";
+    } else {
+      status = "partial"
     }
 
     /**
@@ -429,6 +431,7 @@ exports.getPurchaseInvoices = async (req, res) => {
     const invoices = await PurchaseInvoice.find(query)
       .populate("vendor", "name phone")
       .populate("createdBy", "firstName lastName")
+      .populate("products.product", "_id name")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -489,17 +492,19 @@ exports.getPurchaseInvoicesByVendor = async (req, res) => {
  */
 
 exports.addInstallmentPayment = async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
     const { invoiceID } = req.params;
+    const { payment } = req.body;
 
-    const {
-      amount,
-      paymentMethod,
-      transactionNumber,
-      notes,
-    } = req.body;
 
-    const invoice = await PurchaseInvoice.findOne({ invoiceID });
+    const { amount, paymentMethod, transactionNumber, notes } = payment;
+
+    console.log("Payment: ", payment)
+    console.log("Body: ", req.body)
+
+    const invoice = await PurchaseInvoice.findOne({ invoiceID }).populate("vendor", "name").session(session);
 
     if (!invoice) {
       return res.status(404).json({
@@ -515,6 +520,11 @@ exports.addInstallmentPayment = async (req, res) => {
       });
     }
 
+    const paymentTotal = payment.transactions.reduce(
+      (sum, t) => sum + Number(t.amount || 0),
+      0
+    );
+
     const remainingBeforePayment =
       invoice.totalOrderPrice - invoice.paidAmount;
 
@@ -525,24 +535,48 @@ exports.addInstallmentPayment = async (req, res) => {
       });
     }
 
-    invoice.payments.push({
-      amount,
-      paymentMethod,
-      transactionNumber,
-      notes,
-      createdBy: req.user._id,
+    // invoice.payments.push({
+    //   amount,
+    //   paymentMethod,
+    //   transactionNumber,
+    //   notes,
+    //   createdBy: req.user._id,
+    // });
+
+    payment.transactions.forEach((t) => {
+      invoice.payments.push({
+        amount: Number(t.amount),
+        paymentMethod: t.method,
+        transactionNumber: t.transactionNumber,
+        notes: payment.notes,
+        createdBy: req.user._id,
+      });
     });
 
-    invoice.paidAmount += Number(amount);
+    invoice.paidAmount = (invoice.paidAmount || 0) + paymentTotal;
 
     invoice.remainingAmount =
       invoice.totalOrderPrice - invoice.paidAmount;
 
-    if (invoice.remainingAmount <= 0) {
+    // ensure no negative remaining
+    if (invoice.remainingAmount < 0) {
+      invoice.remainingAmount = 0;
+    }
+
+    // STATUS LOGIC (important fix)
+    if (invoice.paidAmount <= 0) {
+      invoice.status = "unpaid";
+      invoice.isOrderPaid = false;
+    }
+
+    else if (invoice.remainingAmount === 0) {
       invoice.status = "paid";
       invoice.isOrderPaid = true;
-    } else {
+    }
+
+    else {
       invoice.status = "partial";
+      invoice.isOrderPaid = false;
     }
 
     await invoice.save();
