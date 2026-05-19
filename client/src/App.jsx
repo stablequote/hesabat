@@ -15,6 +15,7 @@ import Ledger from './pages/Ledger';
 import Expenses from './pages/Expenses';
 import Products from './pages/Products';
 import Cashout from './pages/Cashout';
+import Overview from './pages/Overview';
 // import Clients from './pages/Clients';
 
 import DashboardLayout from './components/DashboardLayout';
@@ -31,17 +32,21 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* <Route index  element={<Login />} /> */}
-          <Route element={<PrivateRoute allowedRoles={['owner', 'manager', 'staff']} />}>
+          <Route element={<PrivateRoute allowedRoles={['owner', 'manager']} />}>
             <Route path="/" element={<DashboardLayout changeLanguage={changeLanguage} value={i18n.language} />}>
-              {/* <Route path="home" element={<Home />} /> */}
               <Route path="clients" element={<Clients />} />
               <Route path="vendors" element={<Vendors />} />
               <Route path="sale-invoices" element={<SaleInvoices />} />
-              <Route path="purchase-invoices" element={<PurchaseInvoices />} />
-              <Route path="ledger" element={<Ledger />} />
               <Route path="expenses" element={<Expenses />} />
               <Route path="products" element={<Products />} />
               <Route path="cashout" element={<Cashout />} />
+            </Route>
+          </Route>
+          <Route element={<PrivateRoute allowedRoles={['owner']} />}>
+            <Route path="/" element={<DashboardLayout changeLanguage={changeLanguage} value={i18n.language} />}>
+              <Route path="overview" element={<Overview />} />
+              <Route path="purchase-invoices" element={<PurchaseInvoices />} />
+              <Route path="ledger" element={<Ledger />} />  
             </Route>
           </Route>
           {/* Default Route */}
