@@ -1,36 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Container, Flex, Image, Title, Box, Button, Tooltip } from '@mantine/core'
-import { IconBookmarkEdit, IconDownload, IconHistory, IconPlus, IconReportMedical, IconUpload } from '@tabler/icons-react';
+import { Container, Flex, Image, Title, Box, Button, Tooltip, ActionIcon, Group } from '@mantine/core'
+import { IconBarrel, IconBookmarkEdit, IconDownload, IconEdit, IconHistory, IconPlus, IconReportMedical, IconTrash, IconUpload } from '@tabler/icons-react';
 import axios from 'axios';
 import moment from 'moment'
 import CustomTable from '../components/CustomTable'
 import AddProdutModal from '../components/AddProductModal'
+import TanStackTable from '../components/TanStackTable';
+import { showNotification } from '@mantine/notifications';
 
 function Products() {
-  const BASE_URL = import.meta.env.VITE_URL;
-
-  const productsColumns = [
-    { accessorKey: 'image', header: 'Product Name',
-       Cell: ({ cell }) => (
-        <Box>
-          <Image 
-            src={`${BASE_URL}${cell.getValue()}`}
-            height={50}
-            fit="contain"
-            alt={cell.getValue()}
-          />
-        </Box>
-    )},
-    { accessorKey: 'name', header: 'Product Name' },
-    { accessorKey: 'category', header: 'Category' },
-    { accessorKey: 'price', header: 'Price' },
-    { accessorKey: 'quantity', header: 'Quantity' },
-    { accessorKey: 'createdAt', header: 'Creation Date', size: 100,
-      Cell: ({ cell }) => (
-        <Box>{moment(cell.getValue()).format("DD-MMMM-YYYY")}</Box>
-    )},
-  ];
-
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [opened, setOpened] = useState(false);
@@ -41,12 +19,154 @@ function Products() {
   const [modalOpened, setModalOpened] = useState(false);
   const [products, setProducts] = useState([]);
 
+  const BASE_URL = import.meta.env.VITE_URL;
+
+  const productsColumns = [
+    { accessorKey: 'image', header: 'Image',
+       cell: ({ cell }) => (
+        <Box>
+          <Image
+            src={`${BASE_URL}${cell.getValue()}`}
+            height={50}
+            fit="contain"
+            alt={cell.getValue()}
+            fallbackSrc="https://via.placeholder.com/50"
+          />
+        </Box>
+    )},
+    { accessorKey: 'name', header: 'Product Name' },
+    { accessorKey: 'category', header: 'Category' },
+    { accessorKey: 'manufacturer', header: 'Manufacturer' },
+    { accessorKey: 'unitPurchasePrice', header: 'Purchase Price' },
+    { accessorKey: 'unitSalePrice', header: 'Sale Price' },
+    { accessorKey: 'unit', header: 'Unit' },
+    { accessorKey: 'expiryDate', header: 'Expiry Date',
+      cell: ({ getValue }) => {
+        const value = getValue();
+
+        return (
+          <Box
+            style={{
+              borderRadius: "4px",
+              padding: "4px",
+              whiteSpace: "nowrap",
+              direction: "ltr",
+              unicodeBidi: "embed",
+              textAlign: "right",
+            }}
+          >
+            {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
+          </Box>
+        );
+      },
+    },
+    { accessorKey: 'createdAt', header: 'Creation Date', size: 100,
+      cell: ({ getValue }) => {
+        const value = getValue();
+
+        return (
+          <Box
+            style={{
+              borderRadius: "4px",
+              padding: "4px",
+              whiteSpace: "nowrap",
+              direction: "ltr",
+              unicodeBidi: "embed",
+              textAlign: "right",
+            }}
+          >
+            {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
+          </Box>
+        );
+      },
+    },
+    { accessorKey: 'updatedAt', header: 'Last Update', size: 100,
+      cell: ({ getValue }) => {
+        const value = getValue();
+
+        return (
+          <Box
+            style={{
+              borderRadius: "4px",
+              padding: "4px",
+              whiteSpace: "nowrap",
+              direction: "ltr",
+              unicodeBidi: "embed",
+              textAlign: "right",
+            }}
+          >
+            {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
+          </Box>
+        );
+      },
+    },
+  ];
+
   const handleAddProduct = (newProduct) => {
     setProducts([...products, newProduct]);
     console.log(products)
     const res = axios.post(url, products)
   };
 
+  const handleCreateProduct = async (data) => {
+  try {
+
+    const formData = new FormData();
+
+    formData.append("name", data.name);
+
+    formData.append(
+      "manufacturer",
+      data.manufacturer
+    );
+
+    formData.append(
+      "category",
+      data.category
+    );
+
+    formData.append(
+      "unit",
+      data.unit
+    );
+
+    formData.append(
+      "expiryDate",
+      data.expiryDate
+        ? new Date(data.expiryDate).toISOString()
+        : ""
+    );
+
+    formData.append(
+      "unitPurchasePrice",
+      data.unitPurchasePrice
+    );
+
+    formData.append(
+      "unitSalePrice",
+      data.unitSalePrice
+    );
+
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+
+    const res = await axios.post(
+      `${BASE_URL}/products/create`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log(res.data);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const fetchProducts = async (url) => {
     const products = await axios.get(url);
@@ -57,7 +177,7 @@ function Products() {
   }
 
   useEffect(()=> {
-    const url = `${BASE_URL}/products`
+    const url = `${BASE_URL}/products/list`
     fetchProducts(url)
   }, [])
 
@@ -145,9 +265,55 @@ function Products() {
     },
   }
 
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon
+            variant="light"
+            color="blue"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onEdit?.(row.original)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={() => {
+              e.stopPropagation();
+              renderRowActions?.onDelete?.(row.original)
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+  };
+
   return (
-    <Container size="xl">
-      <CustomTable
+    <Container size="100%">
+      <Button 
+        mb="sm" 
+        color="green"
+        onClick={() => setModalOpened(true)}
+      >
+        Add Product</Button>
+      {/* <CustomTable
         columns={productsColumns}
         data={data}
         renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
@@ -157,11 +323,35 @@ function Products() {
         setRowSelection={setRowSelection}
         checkedRow={checkedRow}
         setCheckedRow={setCheckedRow}
+      /> */}
+      <TanStackTable
+        data={data}
+        columns={productsColumns}
+        renderRowActions={(row) => (
+          <>
+            <Button size="xs">Edit</Button>
+            <Button size="xs" color="red">
+              Delete
+            </Button>
+          </>
+        )}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
+        onSelectionChange={setCheckedRow}
       />
+        {/* <Box>
+          <Image
+            src={`http://localhost:5006/uploads/1778107409360.jpg`}
+            height={50}
+            fit="contain"
+            alt={"http://localhost:5006/uploads/1778107409360.jpg"}
+            fallbackSrc="https://via.placeholder.com/50"
+          />
+        </Box> */}
       <AddProdutModal
         opened={modalOpened}
         setOpened={setModalOpened}
-        onSubmit={handleAddProduct}
+        onSubmit={handleCreateProduct}
       />
     </Container>
   )
