@@ -2,20 +2,20 @@ const Expense = require('../models/expense.model');
 
 exports.createExpense = async (req, res) => {
     try {
-        const { amount, description, category, paymentMethod, createdBy  } = req.body;
-        console.log("Expnese User ID: ", createdBy)
-
+        const { amount, description, category, paymentMethod, createdBy, transactionNumber } = req.body;
+        
         const newExpense = new Expense({
             amount,
             description,
             category,
             paymentMethod,
+            transactionNumber,
             createdBy,
         })
         await newExpense.save();
         res.status(201).json({ message: "Expense created successfully", newExpense })
     } catch (error) {
-        res.status(500).json({ error: "Failed to create expense" })
+        res.status(500).json({ error: error.message })
         console.log(error)
     }
 }
@@ -56,7 +56,7 @@ exports.listTodayExpenses = async (req, res) => {
 
 exports.listAllExpenses = async (req, res) => {
     try {
-        const expenses = await Expense.find().populate('createdBy');
+        const expenses = await Expense.find().populate('createdBy', "fullName");
         res.status(200).json(expenses);
     } catch (error) {
         res.status(500).json({ error: 'Failed to list expenses.' });
