@@ -16,6 +16,6 @@ const clientSchema = mongoose.Schema({
             ref: 'saleInvoice', // Relates to the Order Schema
         },
     ],
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Client', clientSchema);
