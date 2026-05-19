@@ -22,6 +22,8 @@ const inventoryRouter = require("./routes/inventory.route");
 const financeTransfersRouter = require("./routes/financeTransfer.route");
 const purchaseInvoiceRouter = require("./routes/purchaseInvoice.route");
 const saleInvoiceRouter = require("./routes/saleInvoice.route");
+const reportsRouter = require("./routes/reports.route");
+const syncRouter = require("./routes/sync.route");
 
 const connectDB = async () => {
   try {
@@ -42,7 +44,7 @@ app.use(cors({
 }))
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}))
-app.use("/uploads", express.static(path.join("uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // routes
 app.use("/auth", authRouter)
@@ -54,6 +56,8 @@ app.use("/inventory", inventoryRouter)
 app.use('/transfers', financeTransfersRouter);
 app.use('/purchase-invoices', purchaseInvoiceRouter);
 app.use('/sale-invoices', saleInvoiceRouter);
+app.use('/reports', reportsRouter);
+app.use("/sync", syncRouter);
 
 // testing server route
 app.get("/test", (req, res) => {
