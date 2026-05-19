@@ -1,105 +1,175 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Box, Button, Flex, Modal, Tooltip } from '@mantine/core';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { IconDoorExit, IconEdit, IconHistory, IconMedicalCrossCircle, IconTrash } from '@tabler/icons-react';
+import { IconDoorExit, IconDownload, IconEdit, IconHistory, IconMedicalCrossCircle, IconMoneybagMove, IconPdf, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
 import moment from 'moment';
 import OrderForm from '../components/OrderForm';
 import CustomTable from '../components/CustomTable';
 import InvoiceTemplate from '../components/InvoiceTemplate';
+import TanStackTable from '../components/TanStackTable';
+import { useReactToPrint } from "react-to-print";
+import AddInstallmentModal from '../components/AddInstallmentModal';
+import { showNotification } from '@mantine/notifications';
 
 const PurchaseInvoices = () => {
-  const { t } = useTranslation();
-  
-  const orderColumns = useMemo(
-    () => [
-      { accessorKey: "orderID", header: t("Order-ID"), size: 100 },
-      { accessorKey: "supplier.name", header: t("Supplier"), size: 150 },
-      { accessorKey: "supplier.supplierID", header: t("Supplier-ID"), size: 150 },
-      { accessorKey: "orderDate", header: t("Order-Date"), sortingFn: 'datetime',size: 120, Cell: ({ cell }) => ( <Box>{moment(cell.getValue()).format("DD-MMMM-YYYY")}</Box>)},
-      { accessorKey: "paymentMethod", header: t("Payment-Method"), size: 120 },
-      { accessorKey: "totalOrderPrice", header: t("Total-Order-Cost"), size: 120 },
-      {
-        accessorKey: "isOrderPaid",
-        header: t("Is-Order-Paid"),
-        accessorFn: (row) => (row.isOrderPaid ? t("Yes") : t("No")),
-      },
-      { accessorKey: "status", header: t("Status"), size: 120 },
-      {
-        accessorKey: "products",
-        header: t("Ordered-Products"),
-        accessorFn: (row) =>
-          row.products?.length
-            ? row.products.map((p) => p.product.product).join(", ")
-            : t("No-Products"),
-      },
-    ],
-    [t]
-  );
-
-  const BASE_URL = import.meta.env.VITE_URL
-
-  const [ordersData, setOrdersData] = useState([]);
+  const [invoicesData, setInvoicesData] = useState([]);
   const [opened, setOpened] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
-  const [suppliersData, setSuppliersData] = useState([]);
+  const [vendorsData, setVendorsData] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState('');
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [invoiceData, setInvoiceData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [installmentModalOpen, setInstallmentModalOpen] = useState(false);
 
   // copied from ahs ==> states for table management
   const [rowSelection, setRowSelection] = useState({});
-  const [checkedRow, setCheckedRow] = useState([])
+  const [checkedRow, setCheckedRow] = useState([]);
+
+  // state for the checked row
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  const printRef = useRef();
+
+  const BASE_URL = import.meta.env.VITE_URL;
+  const purchaseInvoiceInstallmentUrl = `${BASE_URL}/purchase-invoices/payments/${selectedInvoice?.invoiceID}/pay`
+  const { t } = useTranslation();
+  const token = localStorage.getItem("authToken");
+  
+  const orderColumns = useMemo(
+    () => [
+      { accessorKey: "invoiceID", header: t("Order-ID"), size: 100 },
+      { accessorKey: "vendor.name", header: t("Supplier"), size: 150 },
+      { accessorKey: "supplier.supplierID", header: t("Supplier-ID"), size: 150 },
+      { accessorKey: "orderDate", 
+        header: t("Order-Date"), 
+        sortingFn: 'datetime',
+        size: 120,
+        cell: ({ getValue }) => {
+          const value = getValue();
+  
+          return (
+            <Box
+              style={{
+                borderRadius: "4px",
+                padding: "4px",
+                whiteSpace: "nowrap",
+                direction: "ltr",
+                unicodeBidi: "embed",
+                textAlign: "right",
+              }}
+            >
+              {value ? moment(value).format("DD-MM-YYYY HH:MM") : "-"}
+            </Box>
+          );
+        },
+      },
+      { accessorKey: "paymentType", header: t("Payment-Method"), size: 120 },
+      { accessorKey: "totalOrderPrice", header: t("Total-Order-Cost"), size: 120 },
+      { accessorKey: "remainingAmount", header: t("Remaining-Amount"), size: 120 },
+      {
+        accessorKey: "isOrderPaid",
+        header: t("Is-Order-Paid"),
+        accessorFn: (row) => (row.isOrderPaid ? t("Yes") : t("No")),
+      },
+      { accessorKey: "status", 
+        header: t("Status"), 
+        size: 120,
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          return (
+            <Box
+              style={{
+                backgroundColor: value === "paid" ? "#309330" : value === "pending" ? "#ebe72f" : "#e55454",
+                padding: "5px 10px",
+                borderRadius: 20,
+                textAlign: "center",
+                color: "white",
+                maxWidth: 80,
+                marginLeft: 60,
+              }}
+            >
+              { value && value.toUpperCase() }
+            </Box>
+          )
+        }
+        },
+      // {
+      //   accessorKey: "products",
+      //   header: t("Ordered-Products"),
+      //   accessorFn: (row) =>
+      //     row.products?.length
+      //       ? row.products.map((p) => p.product.product).join(", ")
+      //       : t("No-Products"),
+      // },
+    ],
+    [t]
+  );
 
   const handleAddOrder = (newOrder) => {
-    setOrdersData((prevData) => [
+    setInvoicesData((prevData) => [
       ...prevData,
       { ...newOrder, orderId: `ORD${(prevData.length + 1).toString().padStart(3, '0')}` },
     ]);
   };
 
+  const handleInvoiceUpdate = (updatedInvoice) => {
+    setInvoicesData((prev) =>
+      prev.map((invoice) =>
+        invoice._id === updatedInvoice._id
+          ? updatedInvoice
+          : invoice
+      )
+    );
+  };
+
   const fetchInventory = async () => {
-    const inventoryUrl = `${BASE_URL}/inventory/list-all`;
-    const supplierUrl = `${BASE_URL}/supplier/list`;
+    const inventoryUrl = `${BASE_URL}/inventory/list`;
+    const vendorUrl = `${BASE_URL}/vendors/list`;
 
     try {
       const inventoryResponse = await axios.get(inventoryUrl);
       setInventoryData(inventoryResponse.data);
 
-      const supplierResponse = await axios.get(supplierUrl);
-      setSuppliersData(supplierResponse.data.supplier);
+      const vendorResponse = await axios.get(vendorUrl);
+      setVendorsData(vendorResponse.data.vendor);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const fetchOrders = async () => {    
+  const fetchInvoices = async () => {    
     try {
-      const url = `${BASE_URL}/orders/list`;
-      const response = await axios.get(url);
-      console.log(response.data.orders)
-      setOrdersData(response.data.orders);
-      console.log(ordersData)
+      const url = `${BASE_URL}/purchase-invoices/list`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response.data.invoices)
+      setInvoicesData(response.data.invoices);
     } catch (error) {
       console.log(error)
     }
   }
 
   useEffect(() => {
-    fetchOrders();
+    fetchInvoices();
     fetchInventory();
   }, [invoiceData?._id]);
 
   // Transform suppliers data for the Select component
-  const suppliersList = suppliersData.map((item) => ({
+  const suppliersList = vendorsData?.map((item) => ({
     value: item._id,
     label: item.name,
   }));
 
   // Transform products data for the Select component
-  const productsList = inventoryData.map((item) => ({
+  const productsList = inventoryData?.map((item) => ({
     value: item._id,
     label: item.product,
   }));
@@ -139,6 +209,11 @@ const PurchaseInvoices = () => {
     setIsModalOpen(true); // Open the modal
     // setInventoryData(row)
   }
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: selectedRow?.invoiceID || "Invoice",
+  });
 
   const customTableOptions = {
     renderTopToolbarCustomActions: ({ table }) => (
@@ -243,23 +318,107 @@ const PurchaseInvoices = () => {
     },
   }
 
+  const actionsColumn = {
+    id: "actions",
+    header: () => <Box ta="center">Actions</Box>,
+
+    cell: ({ row }) => (
+      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        {/* EDIT */}
+        <Tooltip label="Edit" >
+          <ActionIcon
+            variant="light"
+            color="blue"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              renderRowActions?.onEdit?.(row.original)
+            }}
+          >
+            <IconEdit size={26} />
+          </ActionIcon>
+        </Tooltip>
+
+        {/* DELETE */}
+        <Tooltip label="Delete">
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={(e) => {
+              e.stopPropagation(e);
+              handleDeleteInvoice(row.original._id);
+            }}
+          >
+            <IconTrash size={26} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    ),
+  };
+
+  const customToolbarOptions = {
+    exportToPdf: (checkedRow) =>
+      <Button
+        // disabled={checkedRow?.length === 0} 
+        onClick={() => {
+          console.log("checked row: ", checkedRow)
+        }
+      }
+    >
+      Download pdf
+      <IconDownload />
+    </Button>,
+    payInstallment: (checkedRow) =>
+      <Button 
+        color="green" 
+        disabled={!selectedInvoice}
+        onClick={() => {
+          setInstallmentModalOpen(true)
+          console.log("Selected invoice row: ", selectedInvoice)
+        }
+      }
+    >
+      Pay
+      <IconMoneybagMove />
+    </Button>,
+  };
+
+  const handleDeleteInvoice = async(invoiceId) => {
+    const confirmDialog = window.confirm("هل أنت متأكد من حذف الفاتورة؟")
+    if(!confirmDialog) return;
+    
+    try {
+      const url = `${BASE_URL}/purchase-invoices/delete/${invoiceId}`;
+
+      const res = await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 200) {
+        setInvoicesData((prev) =>
+          prev.filter((invoice) => invoice._id !== invoiceId)
+        );
+      }
+    } catch (error) {
+      showNotification({
+        title: "Error",
+        message: "Erorr deleting invoice",
+        color: "red"
+      })
+    }
+  }
+
   return (
     <Box>
       {/* <InvoiceTemplate order={invoiceData} /> */}
       <Flex mb="xs" justify="flex-start">
         <Button variant="filled" color="green" onClick={() => setOpened(!opened)} leftIcon={<IconMedicalCrossCircle />}>
-          {t("CREATE-ORDER")}
+          {t("CREATE-INVOICE")}
         </Button>
       </Flex>
-      {/* <DataGrid 
-        data={ordersData} 
-        columns={orderColumns} 
-        isModalOpen={isModalOpen} 
-        setIsModalOpen={setIsModalOpen} 
-        displayInvoice={displayInvoice2} 
-      /> */}
-      <CustomTable
-        data={ordersData} 
+      {/* <CustomTable
+        data={invoicesData} 
         columns={orderColumns} 
         onRowClick={(row) => displayInvoice2(row)}
         renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
@@ -268,6 +427,22 @@ const PurchaseInvoices = () => {
         setRowSelection={setRowSelection}
         checkedRow={checkedRow}
         setCheckedRow={setCheckedRow}
+      /> */}
+      <TanStackTable
+        data={invoicesData}
+        columns={orderColumns}
+        renderRowActions={(row) => (
+          <>
+            <Button size="xs">Edit</Button>
+            <Button size="xs" color="red">
+              Delete
+            </Button>
+          </>
+        )}
+        onRowClick={displayInvoice2}
+        actionsColumn={actionsColumn}
+        customToolbarOptions={customToolbarOptions}
+        onSelectionChange={setSelectedInvoice}
       />
       <OrderForm
         opened={opened}
@@ -281,20 +456,36 @@ const PurchaseInvoices = () => {
         selectedProductId={selectedProductId}
         handleSupplierSelection={handleSupplierSelection}
         selectedSupplierId={selectedSupplierId}
-        setInvoiceData={setInvoiceData}
         invoiceData={invoiceData}
+        setInvoiceData={setInvoiceData}
+        loading={loading}
+        setLoading={setLoading}
+        serOrdersData={setInvoicesData}
       />
-      {/* <InvoiceTemplate order={ordersData} /> */}
+      {/* <InvoiceTemplate order={invoicesData} /> */}
       {/* Modal for Invoice */}
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         size={"70rem"}
         // title="Invoice Details"
-        fullScreen        
+        // fullScreen
+        zIndex={999999}
       >
-        {selectedRow && <InvoiceTemplate order={selectedRow} />}
+        {selectedRow && 
+          <div dir="rtl" style={{ direction: "rtl" }}>
+            <InvoiceTemplate ref={printRef} handlePrint={handlePrint} order={selectedRow} title="Purchase Invoice" type="purchase"/>
+          </div>
+        }
       </Modal>
+       <AddInstallmentModal
+        opened={installmentModalOpen}
+        setOpened={setInstallmentModalOpen}
+        invoice={selectedInvoice}
+        token={token}
+        SUBMIT_URL={purchaseInvoiceInstallmentUrl}
+        onSuccess={handleInvoiceUpdate}
+      />
     </Box>
   );
 };
