@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+
+  <title>Financial Report</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 20px;
+      color: #222;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    th {
+      background: #f3f3f3;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      width: 22%;
+      border-radius: 8px;
+    }
+
+    .green {
+      color: green;
+    }
+
+    .red {
+      color: red;
+    }
+
+    .section {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>التقرير المالي الشامل</h1>
+
+  <p>
+    من:
+    <strong><%= startDate %></strong>
+
+    إلى:
+    <strong><%= endDate %></strong>
+  </p>
+
+  <!-- SUMMARY -->
+
+  <div class="summary">
+
+    <div class="card">
+      <h3>إجمالي المبيعات</h3>
+      <p><%= totalSales.toLocaleString() %> SDG</p>
+    </div>
+
+    <div class="card">
+      <h3>إجمالي المشتريات</h3>
+      <p><%= totalPurchases.toLocaleString() %> SDG</p>
+    </div>
+
+    <div class="card">
+      <h3>المنصرفات</h3>
+      <p><%= totalExpenses.toLocaleString() %> SDG</p>
+    </div>
+
+    <div class="card">
+      <h3>صافي الربح</h3>
+
+      <p class="<%= revenue >= 0 ? 'green' : 'red' %>">
+        <%= revenue.toLocaleString() %> SDG
+      </p>
+    </div>
+
+  </div>
+
+  <!-- SALES -->
+
+  <div class="section">
+
+    <h2>المبيعات</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم الفاتورة</th>
+          <th>العميل</th>
+          <th>الإجمالي</th>
+          <th>الحالة</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% sales.forEach((sale) => { %>
+
+          <tr>
+            <td><%= sale.invoiceID %></td>
+
+            <td>
+              <%= sale.client?.fullName || "-" %>
+            </td>
+
+            <td>
+              <%= sale.totalSalePrice.toLocaleString() %>
+            </td>
+
+            <td><%= sale.status %></td>
+
+            <td>
+              <%= new Date(sale.createdAt).toLocaleDateString() %>
+            </td>
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- PURCHASES -->
+
+  <div class="section">
+
+    <h2>المشتريات</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم الفاتورة</th>
+          <th>المورد</th>
+          <th>الإجمالي</th>
+          <th>الحالة</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% purchases.forEach((purchase) => { %>
+
+          <tr>
+            <td><%= purchase.invoiceID %></td>
+
+            <td>
+              <%= purchase.vendor?.name || "-" %>
+            </td>
+
+            <td>
+              <%= purchase.totalOrderPrice.toLocaleString() %>
+            </td>
+
+            <td><%= purchase.status %></td>
+
+            <td>
+              <%= new Date(purchase.createdAt).toLocaleDateString() %>
+            </td>
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- EXPENSES -->
+
+  <div class="section">
+
+    <h2>المنصرفات</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>الوصف</th>
+          <th>الفئة</th>
+          <th>المبلغ</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% expenses.forEach((expense) => { %>
+
+          <tr>
+
+            <td><%= expense.description %></td>
+
+            <td><%= expense.category %></td>
+
+            <td>
+              <%= expense.amount.toLocaleString() %>
+            </td>
+
+            <td>
+              <%= new Date(expense.createdAt).toLocaleDateString() %>
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- EXPENSE CATEGORIES -->
+
+  <div class="section">
+
+    <h2>المنصرفات حسب الفئة</h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>الفئة</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% Object.keys(expenseCategories).forEach((category) => { %>
+
+          <tr>
+
+            <td><%= category %></td>
+
+            <td>
+              <%= expenseCategories[category].toLocaleString() %>
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</body>
+</html>
