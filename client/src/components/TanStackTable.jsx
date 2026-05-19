@@ -1,3 +1,4 @@
+import { useState, useEffect  } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -37,7 +38,9 @@ import {
   IconArrowsSort,
   IconFilter,
   IconEdit,
-  IconTrash
+  IconTrash,
+  IconCross,
+  IconXFilled
 } from "@tabler/icons-react";
 
 import DefaultToolbar from "./DefaultToolbar";
@@ -58,6 +61,14 @@ const TanStackTable = ({ data,
   const [columnVisibility, setColumnVisibility] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState([]);
+  // const [checkedRow, setCheckedRow] = useState([]);
+
+  const densityMap = {
+    xs: "xs",
+    sm: "sm",
+    md: "md",
+    lg: "lg",
+  };
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -132,9 +143,9 @@ const TanStackTable = ({ data,
   //         </ActionIcon>
   //       </Tooltip>
 
-    </Group>
-  ),
-};
+  //     </Group>
+  //   ),
+  // };
 
   const table = useReactTable({
     data,
@@ -155,6 +166,8 @@ const TanStackTable = ({ data,
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
+    globalFilterFn: "includesString",
+    autoResetPageIndex: true,
 
     getRowId: (row) => row._id || row.id,
 
@@ -163,6 +176,15 @@ const TanStackTable = ({ data,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
+
+  const checkedRows = table
+  .getSelectedRowModel()
+  .rows.map((row) => row.original);
+
+  // useEffect(() => {
+  //   onSelectionChange(checkedRows);
+  //   console.log(checkedRows)
+  // }, [checkedRows]);
 
   return (
     <Paper 
@@ -247,9 +269,21 @@ const TanStackTable = ({ data,
 
         <tbody style={{ paddingTop: "3rem" }}>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr 
+              key={row.id}
+              onClick={() => onRowClick?.(row.original)}
+              style={{ cursor: onRowClick ? "pointer" : "default" }}
+            >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td 
+                  key={cell.id}
+                  style={{
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    // borderBottom: "1px solid gray"
+                  }}
+                    // onClick={(e) => e.stopPropagation()} // 🛑 prevent row click on actions column buttons
+                >
                   {flexRender(
                     cell.column.columnDef.cell,
                     cell.getContext()
