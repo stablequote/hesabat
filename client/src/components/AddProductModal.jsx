@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Modal,
   TextInput,
@@ -8,58 +9,60 @@ import {
   Group,
   FileInput,
 } from "@mantine/core";
-import axios from "axios";
 
-export default function AddProductModal({ opened, setOpened, onSubmit }) {
-  const BASE_URL = import.meta.env.VITE_URL;
+import { DateInput } from "@mantine/dates";
 
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState(0);
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState(null);
+export default function AddProductModal({
+  opened,
+  setOpened,
+  onSubmit,
+}) {
 
-  const handleSubmit = async () => {
-  if (!name || !price || !category || !image) return;
+  const [form, setForm] = useState({
+    name: "",
+    manufacturer: "",
+    category: "",
+    unit: "",
+    expiryDate: null,
+    unitPurchasePrice: 0,
+    unitSalePrice: 0,
+    image: null,
+  });
 
-  // 1️⃣ Update parent state for UI purposes (using preview URL for immediate feedback)
-  const previewPayload = {
-    name,
-    price,
-    category,
-    quantity: 5000,
-    image: URL.createObjectURL(image), // preview only (not sent to backend)
-  };
-  onSubmit(previewPayload);
+  // =========================
+  // HANDLE SUBMIT
+  // =========================
 
-  try {
-    // 2️⃣ Prepare FormData for backend
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("price", price);
-    formData.append("category", category);
-    formData.append("quantity", 5000);
-    formData.append("image", image); // raw File object
+  const handleSubmit = () => {
 
-    // 3️⃣ Send to backend
-    const url = `${BASE_URL}/products/create`;
-    const res = await axios.post(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    if (
+      !form.name ||
+      !form.category ||
+      !form.unit
+    ) {
+      return;
+    }
+
+    onSubmit(form);
+
+    // reset form
+    setForm({
+      name: "",
+      manufacturer: "",
+      category: "",
+      unit: "",
+      expiryDate: null,
+      unitPurchasePrice: 0,
+      unitSalePrice: 0,
+      image: null,
     });
 
-    console.log("Product created:", res.data);
-  } catch (error) {
-    console.error("Error creating product:", error);
-  }
+    setOpened(false);
+  };
 
-  // 4️⃣ Close modal and reset form
-  setOpened(false);
-  setName("");
-  setPrice(0);
-  setCategory("");
-  setImage(null);
-};
+  // =========================
+  // UI
+  // =========================
 
   return (
     <Modal
@@ -67,42 +70,148 @@ export default function AddProductModal({ opened, setOpened, onSubmit }) {
       onClose={() => setOpened(false)}
       title="Add New Product"
       size="lg"
+      centered
     >
+
       <TextInput
         label="Product Name"
         placeholder="Enter product name"
-        value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
+        value={form.name}
+        onChange={(e) =>
+          setForm((prev) => ({
+            ...prev,
+            name: e.target.value,
+          }))
+        }
+        mb="sm"
+        required
+      />
+
+      <TextInput
+        label="Manufacturer"
+        placeholder="Enter manufacturer"
+        value={form.manufacturer}
+        onChange={(e) =>
+          setForm((prev) => ({
+            ...prev,
+            manufacturer: e.target.value,
+          }))
+        }
         mb="sm"
       />
-      <NumberInput
-        label="Price (SDG)"
-        placeholder="Enter price"
-        value={price}
-        onChange={setPrice}
-        min={0}
-        mb="sm"
-      />
+
       <Select
         label="Category"
         placeholder="Select category"
-        data={["Sandwiches", "Drinks", "Portions", "Bakes", "Extras"]}
-        value={category}
-        onChange={setCategory}
-        mb="sm"
+        data={[
+          "Tablets",
+          "Capsules",
+          "Syrups",
+          "Infusions",
+          "Creams",
+          "Cosmetics",
+          "Injections",
+          "Medical Supplies",
+        ]}
+        value={form.category}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            category: value,
+          }))
+        }
         searchable
+        mb="sm"
+        required
       />
+
+      <Select
+        label="Unit"
+        placeholder="Select unit"
+        data={[
+          "Kilo",
+          "Barrel",
+          "Piece",
+        ]}
+        value={form.unit}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            unit: value,
+          }))
+        }
+        mb="sm"
+        required
+      />
+
+      <DateInput
+        label="Expiry Date"
+        placeholder="Pick expiry date"
+        value={form.expiryDate}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            expiryDate: value,
+          }))
+        }
+        mb="sm"
+      />
+
+      <NumberInput
+        label="Purchase Price"
+        placeholder="Enter purchase price"
+        value={form.unitPurchasePrice}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            unitPurchasePrice: value || 0,
+          }))
+        }
+        min={0}
+        mb="sm"
+      />
+
+      <NumberInput
+        label="Sale Price"
+        placeholder="Enter sale price"
+        value={form.unitSalePrice}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            unitSalePrice: value || 0,
+          }))
+        }
+        min={0}
+        mb="sm"
+      />
+
       <FileInput
         label="Product Image"
         placeholder="Select image"
         accept="image/*"
-        value={image}
-        onChange={setImage}
+        value={form.image}
+        onChange={(value) =>
+          setForm((prev) => ({
+            ...prev,
+            image: value,
+          }))
+        }
         mb="sm"
       />
-      <Group position="right" mt="md">
-        <Button onClick={handleSubmit}>Add Product</Button>
+
+      <Group justify="flex-end" mt="lg">
+        <Button
+          variant="light"
+          onClick={() => setOpened(false)}
+        >
+          Cancel
+        </Button>
+
+        <Button onClick={handleSubmit}>
+          Add Product
+        </Button>
       </Group>
+
     </Modal>
   );
 }
