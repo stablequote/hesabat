@@ -6,7 +6,7 @@ import axios, { Axios } from 'axios';
 import moment from 'moment';
 import { IconDoorExit, IconDownload, IconEdit, IconFileExport, IconHistory, IconMoneybagMinus, IconTrash } from '@tabler/icons-react';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
-import CustomTable from '../components/CustomTable';
+// import CustomTable from '../components/CustomTable';
 import AddExpenseModal from '../components/AddExpenseModal';
 import TanStackTable from '../components/TanStackTable';
 

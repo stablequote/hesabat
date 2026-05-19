@@ -5,7 +5,7 @@ import { IconDoorExit, IconDownload, IconEdit, IconHistory, IconMedicalCrossCirc
 import axios from 'axios';
 import moment from 'moment';
 import OrderForm from '../components/OrderForm';
-import CustomTable from '../components/CustomTable';
+// import CustomTable from '../components/CustomTable';
 import InvoiceTemplate from '../components/InvoiceTemplate';
 import TanStackTable from '../components/TanStackTable';
 import { useReactToPrint } from "react-to-print";

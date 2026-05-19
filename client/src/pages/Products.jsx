@@ -3,7 +3,7 @@ import { Container, Flex, Image, Title, Box, Button, Tooltip, ActionIcon, Group 
 import { IconBarrel, IconBookmarkEdit, IconDownload, IconEdit, IconHistory, IconPlus, IconReportMedical, IconTrash, IconUpload } from '@tabler/icons-react';
 import axios from 'axios';
 import moment from 'moment'
-import CustomTable from '../components/CustomTable'
+// import CustomTable from '../components/CustomTable'
 import AddProdutModal from '../components/AddProductModal'
 import TanStackTable from '../components/TanStackTable';
 import { showNotification } from '@mantine/notifications';

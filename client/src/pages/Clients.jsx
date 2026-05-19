@@ -4,7 +4,7 @@ import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import moment from 'moment'
 import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-react';
-import CustomTable from '../components/CustomTable'
+// import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
 import TanStackTable from '../components/TanStackTable';
 
@@ -227,6 +227,7 @@ function Clients() {
       })
     }
   }
+  
   const handleEditMerchant = async (row) => {
     const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
     if(!confirmDialog) return;

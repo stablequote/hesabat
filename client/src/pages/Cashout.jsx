@@ -7,7 +7,7 @@ import moment from 'moment';
 import { IconTransfer, IconDoorExit, IconDownload, IconEdit, IconHistory, IconTrash, IconFileExport } from '@tabler/icons-react';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import CashoutModal from '../components/CashoutModal';
-import CustomTable from '../components/CustomTable';
+// import CustomTable from '../components/CustomTable';
 import TanStackTable from '../components/TanStackTable';
 
 function Cashout() {
