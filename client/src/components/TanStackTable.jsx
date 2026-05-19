@@ -66,10 +66,20 @@ const TanStackTable = ({ data, columns, renderRowActions }) => {
       />
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onChange={row.getToggleSelectedHandler()}
-      />
+      <Box onClick={(e) => e.stopPropagation()}>
+        <Checkbox
+          checked={row.getIsSelected()}
+          onChange={(e) => {
+            row.getToggleSelectedHandler()(e);
+
+            if (e.currentTarget.checked) {
+              onSelectionChange?.(row.original);
+            } else {
+              onSelectionChange?.(null);
+            }
+          }}
+        />
+      </Box>
     ),
   };
 
