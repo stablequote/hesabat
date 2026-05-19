@@ -60,11 +60,11 @@ function DashboardLayout({ changeLanguage, value }) {
         <Outlet />
       </AppShell.Main>
 
-      <AppShell.Footer bg="#cec8c8">
+      {/* <AppShell.Footer bg="#cec8c8">
         <Box h={60} p="xs">
           <Text ta="center">© 2026 codelab SD.</Text>
         </Box>
-      </AppShell.Footer>
+      </AppShell.Footer> */}
     </AppShell>
   );
 }
