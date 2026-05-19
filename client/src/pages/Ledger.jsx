@@ -17,9 +17,9 @@ const Ledger = () => {
         setLoading(true);
         try {
             const [ salesRes, expensesRes, transfersRes ] = await Promise.all([
-                axios.get(`${BASE_URL}/sales/list-sales`),
+                axios.get(`${BASE_URL}/sale-invoices/list`),
                 axios.get(`${BASE_URL}/expenses/list`),
-                axios.get(`${BASE_URL}/transfer/list-today`)
+                axios.get(`${BASE_URL}/transfers/list-today`)
             ])
             console.log(expensesRes.data)
             console.log(salesRes.data.sales)
