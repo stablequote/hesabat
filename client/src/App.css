@@ -6,3 +6,10 @@ a {
   padding: 7px;
   cursor: pointer !important;
 }
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
