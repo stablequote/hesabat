@@ -6,5 +6,6 @@ router.post('/create', vendorController.addVendor);
 router.get('/list', vendorController.listVendors);
 router.get('/invoices', vendorController.listVendorInvoices);
 router.post('/list-single', vendorController.listSingleVendor);
+router.delete('/delete/:id', vendorController.deleteSingleVendor);
 
 module.exports = router;
