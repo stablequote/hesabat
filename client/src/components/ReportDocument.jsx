@@ -6,8 +6,8 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
-import CairoRegular from "../assets/Cairo/Static/Cairo-Regular.ttf";
-import CairoBold from "../assets/Cairo/Static/Cairo-Bold.ttf";
+import CairoRegular from "../assets/Cairo/static/Cairo-Regular.ttf";
+import CairoBold from "../assets/Cairo/static/Cairo-Bold.ttf";
 
 Font.register({
   family: "Cairo",
