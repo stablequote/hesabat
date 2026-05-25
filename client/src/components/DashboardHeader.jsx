@@ -1,51 +1,168 @@
 import React from "react";
 import {
-  AppShell,
+  Box,
   Text,
-  Title,
   Group,
   ActionIcon,
-  useMantineTheme,
-  Input,
+  Burger,
+  Menu,
   Select,
-  Flex,
-  Container,
-  Box,
 } from "@mantine/core";
-import { IconSearch, IconBell, IconUser } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
+import {
+  IconBell,
+  IconUser,
+  IconDotsVertical,
+  IconLanguage,
+} from "@tabler/icons-react";
 import moment from "moment";
-import SyncButton from './SyncButton';
+import SyncButton from "./SyncButton";
 
-const DashboardHeader = ({changeLanguage, value, shiftRemainingTime}) => {
-  const theme = useMantineTheme();
+const DashboardHeader = ({
+  changeLanguage,
+  value,
+  shiftRemainingTime,
+  navOpened,
+  onNavToggle,
+}) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   return (
-    <Box height={60}  p="md" style={{backgroundColor: "#71a0e2", color: "white"}} >
-      <Flex justify="space-between">
-        <Text color="orange" fz={32} fw="bold" ff="monospace" style={{ lineHeight: "1rem",  }}>حسابات</Text>
+    <Box
+      h={60}
+      px={isMobile ? "sm" : "md"}
+      style={{
+        backgroundColor: "#71a0e2",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <Group justify="space-between" w="100%" wrap="nowrap" gap="xs">
 
-        {/* Right side: Date, time, and icons */}
-        <Group>
-          <SyncButton />
-          <Select
-            data={[
-              {value: "en", label: "English"},
-              {value: "ar", label: "Arabic"}
-            ]}
-            placeholder="Language"
-            defaultValue="English"
-            value={value}
-            onChange={changeLanguage}
+        {/* Left: Burger (mobile only) + Logo */}
+        <Group gap="xs" wrap="nowrap">
+          <Burger
+            opened={navOpened}
+            onClick={onNavToggle}
+            hiddenFrom="sm"
+            color="white"
+            size="sm"
           />
-          <Text>{moment(Date.now()).format('DD-MMMM-YYYY h:mm A')}</Text>
-          <ActionIcon onClick={() => alert("Notifications feature is coming soom...")}>
-            <IconBell size={20} />
-          </ActionIcon>
-          <ActionIcon onClick={() => alert("Profile management is coming soon...")}>
-            <IconUser size={20} />
-          </ActionIcon>
-          <Text color="white">{shiftRemainingTime}</Text>
+          <Text
+            c="orange"
+            fz={isMobile ? 22 : 32}
+            fw="bold"
+            ff="monospace"
+            style={{ lineHeight: 1, whiteSpace: "nowrap" }}
+          >
+            حسابات
+          </Text>
         </Group>
-      </Flex>
+
+        {/* Right side */}
+        {isMobile ? (
+          /* ── Mobile: keep only critical items, rest in overflow menu ── */
+          <Group gap={6} wrap="nowrap">
+            {/* Shift timer — compact */}
+            {shiftRemainingTime ? (
+              <Text size="xs" c="white" style={{ whiteSpace: "nowrap" }}>
+                {shiftRemainingTime}
+              </Text>
+            ) : null}
+
+            <SyncButton />
+
+            {/* Overflow menu for secondary actions */}
+            <Menu shadow="md" width={220} position="bottom-end">
+              <Menu.Target>
+                <ActionIcon variant="subtle" color="white">
+                  <IconDotsVertical size={20} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {/* Date/time */}
+                <Menu.Label>
+                  {moment(Date.now()).format("DD MMM YYYY, h:mm A")}
+                </Menu.Label>
+
+                {/* Language selector inside the menu */}
+                <Box px="sm" py={6}>
+                  <Select
+                    data={[
+                      { value: "en", label: "English" },
+                      { value: "ar", label: "Arabic" },
+                    ]}
+                    placeholder="Language"
+                    value={value}
+                    onChange={changeLanguage}
+                    size="xs"
+                    leftSection={<IconLanguage size={14} />}
+                  />
+                </Box>
+
+                <Menu.Divider />
+
+                <Menu.Item
+                  leftSection={<IconBell size={16} />}
+                  onClick={() =>
+                    alert("Notifications feature is coming soon...")
+                  }
+                >
+                  Notifications
+                </Menu.Item>
+
+                <Menu.Item
+                  leftSection={<IconUser size={16} />}
+                  onClick={() =>
+                    alert("Profile management is coming soon...")
+                  }
+                >
+                  Profile
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
+        ) : (
+          /* ── Desktop: full inline controls ── */
+          <Group gap="sm" wrap="nowrap">
+            <SyncButton />
+            <Select
+              data={[
+                { value: "en", label: "English" },
+                { value: "ar", label: "Arabic" },
+              ]}
+              placeholder="Language"
+              value={value}
+              onChange={changeLanguage}
+              size="sm"
+              style={{ width: 120 }}
+            />
+            <Text size="sm" style={{ whiteSpace: "nowrap" }}>
+              {moment(Date.now()).format("DD-MMMM-YYYY h:mm A")}
+            </Text>
+            <ActionIcon
+              variant="subtle"
+              color="white"
+              onClick={() => alert("Notifications feature is coming soon...")}
+            >
+              <IconBell size={20} />
+            </ActionIcon>
+            <ActionIcon
+              variant="subtle"
+              color="white"
+              onClick={() => alert("Profile management is coming soon...")}
+            >
+              <IconUser size={20} />
+            </ActionIcon>
+            {shiftRemainingTime && (
+              <Text size="sm" c="white" style={{ whiteSpace: "nowrap" }}>
+                {shiftRemainingTime}
+              </Text>
+            )}
+          </Group>
+        )}
+      </Group>
     </Box>
   );
 };
