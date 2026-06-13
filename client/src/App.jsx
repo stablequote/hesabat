@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useTranslation } from "react-i18next";
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 import PrivateRoute from './pages/ProtectedRoute';
@@ -53,6 +54,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/unauthorized' element={<UnAuthorized />} />
         </Routes>
+        <Analytics />
       </AuthProvider>
     </Router>
   )
