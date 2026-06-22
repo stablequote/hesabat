@@ -59,6 +59,11 @@ app.use('/sale-invoices', saleInvoiceRouter);
 app.use('/reports', reportsRouter);
 app.use("/sync", syncRouter);
 
+// Health check for deployment monitoring
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date() });
+});
+
 // testing server route
 app.get("/test", (req, res) => {
   res.send("server is working")
