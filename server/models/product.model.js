@@ -18,7 +18,7 @@ const productSchema = mongoose.Schema({
     },
     unit: {
         type: String,
-        enum: ["Kilo", "Barrel", "Piece"],
+        enum: ["Box", "Pack", "Piece"],
         required: true,
     },
     expiryDate: {
