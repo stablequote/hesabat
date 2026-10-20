@@ -124,8 +124,8 @@ export default function AddProductModal({
         label="Unit"
         placeholder="Select unit"
         data={[
-          "Kilo",
-          "Barrel",
+          "Box",
+          "Pack",
           "Piece",
         ]}
         value={form.unit}
