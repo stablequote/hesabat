@@ -104,14 +104,9 @@ export default function AddProductModal({
         label="Category"
         placeholder="Select category"
         data={[
-          "Tablets",
-          "Capsules",
-          "Syrups",
-          "Infusions",
-          "Creams",
-          "Cosmetics",
-          "Injections",
-          "Medical Supplies",
+          "Laboratory Consumables",
+          "Laboratory Devices",
+          "Laboratory Equipments",
         ]}
         value={form.category}
         onChange={(value) =>
