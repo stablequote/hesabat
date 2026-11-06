@@ -64,10 +64,11 @@ exports.deleteSingleClient = async (req, res) => {
 
 exports.updateClient = async (req, res) => {
     try {
-        const { ClientId } = req.params;
+        console.log('params:', req.params, 'body:', req.body);
+        const { clientId } = req.params;
         const updates = req.body;
 
-        const updatedClient = await Client.findByIdAndUpdate(ClientId, updates, { new: true });
+        const updatedClient = await Client.findByIdAndUpdate(clientId, updates, { new: true });
         if (!updatedClient) return res.status(404).json({ message: 'Client not found.' });
 
         res.status(200).json({ message: 'Client updated successfully.', Client: updatedClient });

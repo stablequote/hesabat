@@ -6,6 +6,7 @@ import moment from 'moment'
 import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-react';
 // import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
+import EditClientModal from '../components/EditClientModal';
 import TanStackTable from '../components/TanStackTable';
 
 export const clientsSeed = [
@@ -56,6 +57,17 @@ function Clients() {
     location: '',
     email: "",
   })
+
+  // edit client modal update
+  const [editOpened, setEditOpened] = useState(false);
+  const [editingClientId, setEditingClientId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    location: '',
+    email: '',
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // state imports for MRT
@@ -193,7 +205,8 @@ function Clients() {
         })
         setOpened(false)
       }
-      window.location.reload()
+      setClientsData([...prev, res.data])
+      // window.location.reload()
     } catch (error) {
       showNotification({
         title: 'Error creating a merchant',
@@ -204,7 +217,7 @@ function Clients() {
   }
 
   const handleDeleteMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
+    const confirmDialog = window.confirm("هل أنت متأكد من حذف هذا العميل؟")
     if(!confirmDialog) return;
       try {
         const clientId = row.original._id
@@ -218,7 +231,8 @@ function Clients() {
             color: "green"
           })
         }
-        window.location.reload()
+        setClientsData(res.data)
+        // window.location.reload()
     } catch (error) {
       showNotification({
         title: "Error",
@@ -228,30 +242,95 @@ function Clients() {
     }
   }
   
-  const handleEditMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
-    if(!confirmDialog) return;
-      try {
-        const id = row.original._id
-        console.log(id)
-        const url = `${BASE_URL}/clients/edit/${id}`
-        const res = await axios.put(url)
-        if(res.status === 200) {
-          showNotification({
-            title: "Success",
-            message: "Merchant details successfully updated",
-            color: "green"
-          })
-        }
-        window.location.reload()
-    } catch (error) {
+  const handleEditClick = (client) => {
+    setEditingClientId(client._id);
+    setEditForm({
+      name: client.fullName ?? '',
+      phone: client.contactDetails?.phone ?? '',
+      location: client.contactDetails?.location ?? '',
+      email: client.contactDetails?.email ?? '',
+    });
+    setEditOpened(true);
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const closeEditModal = () => {
+    setEditOpened(false);
+    setEditingClientId(null);
+  };
+
+  const submitEditForm = async () => {
+    if (!editForm.name.trim()) {
       showNotification({
-        title: "Error",
-        message: "Error occured while updating merchant details",
-        color: "red"
-      })
+        title: 'Error',
+        message: 'Client name is required',
+        color: 'red',
+      });
+      return;
     }
-  }
+
+    const payload = {
+      fullName: editForm.name.trim(),
+      contactDetails: {
+        phone: editForm.phone,
+        location: editForm.location,
+        email: editForm.email,
+      },
+    };
+
+    try {
+      setEditSubmitting(true);
+      const clientId = editingClientId;
+      const url = `${BASE_URL}/clients/edit/${clientId}`;
+      const res = await axios.put(url, payload);
+
+      if (res.status === 200) {
+        setClientsData((prev) =>
+          prev.map((c) =>
+            c._id === editingClientId
+              ? {
+                  ...c,
+                  fullName: payload.fullName,
+                  contactDetails: {
+                    ...(c.contactDetails ?? {}),
+                    ...payload.contactDetails,
+                  },
+                }
+              : c
+          )
+        );
+        closeEditModal();
+        showNotification({
+          title: 'Success',
+          message: 'Client details successfully updated',
+          color: 'green',
+        });
+      } else {
+        showNotification({
+          title: 'Error',
+          message: `Unexpected response status: ${res.status}`,
+          color: 'red',
+        });
+      }
+    } catch (error) {
+      const data = error.response?.data;
+      const message =
+        (typeof data === 'string' && data) ||
+        data?.message ||
+        data?.error ||
+        error.message;
+      showNotification({
+        title: 'Error updating client',
+        message,
+        color: 'red',
+      });
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
 
   const actionsColumn = {
     id: "actions",
@@ -267,7 +346,7 @@ function Clients() {
             color="blue"
             onClick={(e) => {
               e.stopPropagation(e);
-              handleActionClick(row.original._id)
+              handleEditClick(row.original)
             }}
           >
             <IconEdit size={26} />
@@ -335,6 +414,14 @@ function Clients() {
         setClientForm={setClientForm} 
         handleChange={handleChange} 
         submitClientForm={submitClientForm}
+      />
+      <EditClientModal
+        opened={editOpened}
+        onClose={closeEditModal}
+        editForm={editForm}
+        handleChange={handleEditChange}
+        onSubmit={submitEditForm}
+        loading={editSubmitting}
       />
       {
         loading &&
