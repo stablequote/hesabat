@@ -256,13 +256,13 @@ const TanStackTable = ({
         setIsFullscreen={setIsFullscreen}
         compact={isMobile}
       >
-        <Stack gap={6} w={isMobile ? "100%" : "auto"}>
+        <Group gap={6} wrap="wrap" w={isMobile ? "100%" : "auto"}>
           {Object.entries(customToolbarOptions || {}).map(([key, renderFn]) => (
             <div key={key}>
               {typeof renderFn === "function" ? renderFn(checkedRows) : renderFn}
             </div>
           ))}
-        </Stack>
+        </Group>
       </DefaultToolbar>
 
       {/* On mobile, only wrap in horizontal scroll if we still render the table (we don't by default) */}
