@@ -9,8 +9,8 @@ exports.addVendor = async (req, res) => {
     }
 
     const newVendor = new Vendor({
-      name, 
-      vendorID, 
+      name,
+      vendorID,
       contactDetails,
     });
 
@@ -115,5 +115,20 @@ exports.deleteSingleVendor = async (req, res) => {
     res.status(200).json({ message: "vendor successfully deleted" })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+exports.updateVendor = async (req, res) => {
+  try {
+    console.log('params:', req.params, 'body:', req.body);
+    const { id } = req.params;
+    const updates = req.body;
+
+    const updatedVendor = await Vendor.findByIdAndUpdate(id, updates, { new: true });
+    if (!updatedVendor) return res.status(404).json({ message: 'Vendor not found.' });
+
+    res.status(200).json({ message: 'Vendor updated successfully.', Vendor: updatedVendor });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update Vendor.' });
   }
 }
