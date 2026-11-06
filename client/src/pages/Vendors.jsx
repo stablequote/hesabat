@@ -328,10 +328,6 @@ function Vendors() {
   
   return (
     <Container size="100%">
-      {/* <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Create Vendor</Button> */}
-      {/* <ActionIcon mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>
-        <IconPlusFilled size={32} />
-      </ActionIcon> */}
       <Button mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>Create Vendor</Button>
        <TanStackTable
         data={vendorsData}

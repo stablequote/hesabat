@@ -376,7 +376,7 @@ function Clients() {
 
   return (
     <Container size="100%">
-      <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Add Client</Button>
+      <Button mb='sm' variant="filled" color="green" aria-label="create client" size="lg" onClick={() => setOpened(!opened)}>Add Client</Button>
       {/* <CustomTable 
         columns={columns} 
         data={clientsSeed}
