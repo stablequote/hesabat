@@ -4,20 +4,21 @@ exports.addVendor = async (req, res) => {
   try {
     const { name, vendorID, contactDetails } = req.body;
 
-    if(!name || contactDetails) {
-      res.status(404).json({ message: "vendor details must be submitted" })
+    if (!name || !contactDetails) {
+      return res.status(400).json({ message: 'Vendor details must be submitted.' });
     }
 
     const newVendor = new Vendor({
       name, 
       vendorID, 
-      contactDetails
+      contactDetails,
     });
 
     await newVendor.save();
-    res.status(201).json({ message: 'Vendor added successfully.', vendor: newVendor });
+    return res.status(201).json({ message: 'Vendor added successfully.', vendor: newVendor });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add vendor.' });
+    console.error('addVendor failed:', error);
+    return res.status(500).json({ error: 'Failed to add vendor.' });
   }
 };
 
