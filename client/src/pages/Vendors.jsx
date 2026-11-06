@@ -6,6 +6,7 @@ import moment from 'moment'
 import { IconEdit, IconPlusFilled, IconTicket, IconTrash } from '@tabler/icons-react';
 // import CustomTable from '../components/CustomTable'
 import AddVendorModal from '../components/AddVendorModal';
+import EditVendorModal from '../components/EditVendorModal';
 import TanStackTable from '../components/TanStackTable';
 
 function Vendors() {
@@ -17,6 +18,17 @@ function Vendors() {
     location: '',
     phone: '',
   })
+
+  // edit vendor update
+  const [editOpened, setEditOpened] = useState(false);
+  const [editingVendorId, setEditingVendorId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    vendorID: '',
+    location: '',
+    phone: '',
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // state imports for MRT
@@ -122,17 +134,17 @@ function Vendors() {
       if(res.status === 201) {
         showNotification({
           title: 'Success',
-          message: 'Merchant created succesfully',
+          message: 'Vendor created succesfully',
           color: 'green'
         })
         setOpened(false)
         // settting state
         setVendorsData((prev) => [...prev, res.data.vendor])
       }
-      window.location.reload()
+      // window.location.reload()
     } catch (error) {
       showNotification({
-        title: 'Error creating a merchant',
+        title: 'Error creating a vendor',
         message: error,
         color: 'red'
       })
@@ -150,7 +162,7 @@ function Vendors() {
         if(res.status === 200) {
           showNotification({
             title: "Success",
-            message: "Merchant successfully deleted",
+            message: "Vendor successfully deleted",
             color: "green"
           })
         }
@@ -158,36 +170,98 @@ function Vendors() {
     } catch (error) {
       showNotification({
         title: "Error",
-        message: "Error occured while deleting merchant",
+        message: "Error occured while deleting vendor",
         color: "red"
       })
     }
   }
 
-  const handleEditVendor = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد؟")
-    if(!confirmDialog) return;
-      try {
-        const id = row.original._id
-        console.log(id)
-        const url = `${BASE_URL}/vendors/edit/${id}`
-        const res = await axios.put(url)
-        if(res.status === 200) {
-          showNotification({
-            title: "Success",
-            message: "Merchant details successfully updated",
-            color: "green"
-          })
-        }
-        window.location.reload()
-    } catch (error) {
+  const handleEditClick = (vendor) => {
+    setEditingVendorId(vendor._id);
+    setEditForm({
+      name: vendor.name ?? '',
+      vendorID: vendor.vendorID ?? '',
+      location: vendor.contactDetails?.location ?? '',
+      phone: vendor.contactDetails?.phone ?? '',
+    });
+    setEditOpened(true);
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const closeEditModal = () => {
+    setEditOpened(false);
+    setEditingVendorId(null);
+  };
+
+  const submitEditForm = async () => {
+    if (!editForm.name.trim()) {
       showNotification({
-        title: "Error",
-        message: "Error occured while updating merchant details",
-        color: "red"
-      })
+        title: 'Error',
+        message: 'Vendor name is required',
+        color: 'red',
+      });
+      return;
     }
-  }
+
+    const payload = {
+      name: editForm.name.trim(),
+      vendorID: editForm.vendorID,
+      contactDetails: {
+        phone: editForm.phone,
+        location: editForm.location,
+      },
+    };
+
+    try {
+      setEditSubmitting(true);
+      const url = `${BASE_URL}/vendors/edit/${editingVendorId}`;
+      const res = await axios.put(url, payload);
+
+      if (res.status === 200) {
+        const updated = res.data?.vendor;
+        setVendorsData((prev) =>
+          prev.map((v) =>
+            v._id === editingVendorId
+              ? updated ?? {
+                  ...v,
+                  ...payload,
+                  contactDetails: { ...(v.contactDetails ?? {}), ...payload.contactDetails },
+                }
+              : v
+          )
+        );
+        closeEditModal();
+        showNotification({
+          title: 'Success',
+          message: 'Vendor details successfully updated',
+          color: 'green',
+        });
+      } else {
+        showNotification({
+          title: 'Error',
+          message: `Unexpected response status: ${res.status}`,
+          color: 'red',
+        });
+      }
+    } catch (error) {
+      const data = error.response?.data;
+      const message =
+        (typeof data === 'string' && data) ||
+        data?.message ||
+        data?.error ||
+        error.message;
+      showNotification({
+        title: 'Error updating vendor',
+        message,
+        color: 'red',
+      });
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
 
   const actionsColumn = {
     id: "actions",
@@ -203,7 +277,7 @@ function Vendors() {
             color="blue"
             onClick={(e) => {
               e.stopPropagation(e);
-              handleEditVendor(row)
+              handleEditClick(row.original)
             }}
           >
             <IconEdit size={26} />
@@ -234,11 +308,11 @@ function Vendors() {
         // disabled={checkedRow?.length === 0} 
         onClick={() => {
           console.log("checked row: ", checkedRow)
-        }
-      }
-    >
-      Export
-    </Button>,
+          }}
+        >
+        Export
+      </Button>
+    ,
     exportSelectedClientsToExcel: (checkedRow) =>
      <Button 
         color="blue" 
@@ -255,20 +329,13 @@ function Vendors() {
   return (
     <Container size="100%">
       {/* <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Create Vendor</Button> */}
-      <ActionIcon mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>
+      {/* <ActionIcon mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>
         <IconPlusFilled size={32} />
-      </ActionIcon>
+      </ActionIcon> */}
+      <Button mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>Create Vendor</Button>
        <TanStackTable
         data={vendorsData}
         columns={columns}
-        renderRowActions={(row) => (
-          <>
-            <Button size="xs">Edit</Button>
-            <Button size="xs" color="red">
-              Delete
-            </Button>
-          </>
-        )}
         actionsColumn={actionsColumn}
         customToolbarOptions={customToolbarOptions}
       />
@@ -279,6 +346,14 @@ function Vendors() {
         setVendorForm={setVendorForm} 
         submitVendorForm={submitVendorForm}
         handleChange={handleChange} 
+      />
+      <EditVendorModal
+        opened={editOpened}
+        onClose={closeEditModal}
+        editForm={editForm}
+        handleChange={handleEditChange}
+        onSubmit={submitEditForm}
+        loading={editSubmitting}
       />
       {
         loading &&
