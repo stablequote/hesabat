@@ -20,6 +20,6 @@ const vendorSchema = mongoose.Schema({
             ref: 'PurchaseInvoice', // Relates to the PurchaseInvoice Schema
         },
     ],
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Vendor', vendorSchema);
