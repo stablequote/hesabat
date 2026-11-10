@@ -64,10 +64,10 @@ const SalesInvoiceTemplate = forwardRef(({ order, handlePrint, title, type }, re
           <Grid.Col span={6}>
             <Stack gap={4}>
               <Text size="sm">
-                <strong>{t("Supplier")}:</strong> {order.client?.fullName}
+                <strong>{t("Client")}:</strong> {order.client?.fullName}
               </Text>
               <Text size="sm">
-                <strong>{t("Order Date")}:</strong> {formatDate(order.createdAt)}
+                <strong>{t("Invoice-Date")}:</strong> {formatDate(order.createdAt)}
               </Text>
             </Stack>
           </Grid.Col>
@@ -75,13 +75,13 @@ const SalesInvoiceTemplate = forwardRef(({ order, handlePrint, title, type }, re
           <Grid.Col span={6}>
             <Stack gap={4} align="flex-end">
               <Text size="sm">
-                <strong>{t("Invoice Total Amount")}:</strong> {order?.totalSalePrice} SDG
+                <strong>{t("Invoice-Total-Amount")}:</strong> {order?.totalSalePrice.toLocaleString()} SDG
               </Text>
               <Text size="sm">
-                <strong>{t("Paid Amount")}:</strong> {formatCurrency(order?.paidAmount)} SDG
+                <strong>{t("Paid-Amount")}:</strong> {formatCurrency(order?.paidAmount)} SDG
               </Text>
               <Text size="sm">
-                <strong>{t("Remaining")}:</strong> {formatCurrency(order?.remainingAmount.toLocaleString())} SDG
+                <strong>{t("Remaining-Amount")}:</strong> {formatCurrency(order?.remainingAmount.toLocaleString())} SDG
               </Text>
             </Stack>
           </Grid.Col>
@@ -104,22 +104,22 @@ const SalesInvoiceTemplate = forwardRef(({ order, handlePrint, title, type }, re
               <tr key={idx} style={{ textAlign: "center" }}>
                 <td>{item?.productSnapShot?.name }</td>
                 <td>{item?.quantity}</td>
-                <td>{item?.unit}</td>
-                <td>{formatCurrency(item?.productSnapShot?.salePrice.toLocaleString())}</td>
-                <td>{formatCurrency(item?.products?.unitTotalPrice?.toLocaleString())}</td>
+                <td>{item?.unitName}</td>
+                <td>{formatCurrency(item?.productSnapShot?.salePrice)}</td>
+                <td>{formatCurrency(item?.unitTotalPrice)}</td>
               </tr>
             ))}
           </tbody>
         </Table>
 
         {/* 🔷 TOTAL */}
-        <Group justify="flex-end" mt="md">
+        {/* <Group justify="flex-end" mt="md">
           <Box>
             <Text size="lg" fw={700}>
               {t("Total")}: {formatCurrency(order.totalOrderPrice)} SDG
             </Text>
           </Box>
-        </Group>
+        </Group> */}
 
         <Divider my="lg" />
 
