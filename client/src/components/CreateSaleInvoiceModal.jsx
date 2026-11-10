@@ -4,7 +4,7 @@ import { IconPlus, IconMinus, IconTrash, IconUserPlus } from "@tabler/icons-reac
 import axios from "axios";
 import { showNotification } from "@mantine/notifications";
 import { stockParts } from "../utils/units";
-import "../assets/css/Createsaleinvoicemodal.css";
+import "../assets/css/CreateSaleInvoiceModal.css";
 
 // ---------- helpers (outside the component) ----------
 const idOf = (u) => String(u?._id ?? u ?? "");

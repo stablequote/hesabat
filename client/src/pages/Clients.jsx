@@ -391,15 +391,15 @@ function Clients() {
 
   
   const actionsColumn = {
-  id: "actions",
-  header: "Actions",
-  cell: ({ row }) => (
-    <RowActions
-      onEdit={() => handleEditClick(row.original)}
-      onDelete={() => handleDeleteMerchant(row)}
-    />
-  ),
-};
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => (
+      <RowActions
+        onEdit={() => handleEditClick(row.original)}
+        onDelete={() => handleDeleteMerchant(row)}
+      />
+    ),
+  };
 
 
   const customToolbarOptions = {
