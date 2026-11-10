@@ -17,10 +17,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Authentication routes
-router.post('/create', upload.single("image"), productController.addProduct);
-router.get('/list', productController.listAllProducts);
-router.put('update/:id', upload.single("image"), productController.updateProduct);
-router.delete('delete/:id', productController.deleteSingleProduct);
+router.post('/create', upload.single("image"), productController.createProduct);
+router.get('/list', productController.listProducts);
+router.put('/edit/:id', upload.single("image"), productController.updateProduct);
+router.delete('/delete/:id', productController.deleteSingleProduct);
 router.delete('/delete/multiple/', productController.deleteMultipleProducts);
 
 module.exports = router;
