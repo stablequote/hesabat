@@ -24,6 +24,7 @@ const purchaseInvoiceRouter = require("./routes/purchaseInvoice.route");
 const saleInvoiceRouter = require("./routes/saleInvoice.route");
 const reportsRouter = require("./routes/reports.route");
 const syncRouter = require("./routes/sync.route");
+const unitsRouter = require("./routes/units.route");
 
 const connectDB = async () => {
   try {
@@ -58,6 +59,7 @@ app.use('/purchase-invoices', purchaseInvoiceRouter);
 app.use('/sale-invoices', saleInvoiceRouter);
 app.use('/reports', reportsRouter);
 app.use("/sync", syncRouter);
+app.use("/units", unitsRouter);
 
 // Health check for deployment monitoring
 app.get('/health', (req, res) => {
