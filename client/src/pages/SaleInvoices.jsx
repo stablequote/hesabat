@@ -139,8 +139,8 @@ const SaleInvoices = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data)
-      setInvoicesData(response.data);
+      console.log(response?.data)
+      setInvoicesData(response?.data);
       console.log(invoicesData)
     } catch (error) {
       console.log(error)

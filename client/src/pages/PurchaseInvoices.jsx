@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip } from '@mantine/core';
+import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip, Badge, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { IconDoorExit, IconDownload, IconEdit, IconHistory, IconMedicalCrossCircle, IconMoneybagMove, IconPdf, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import TanStackTable from '../components/TanStackTable';
 import { useReactToPrint } from "react-to-print";
 import AddInstallmentModal from '../components/AddInstallmentModal';
 import { showNotification } from '@mantine/notifications';
+import { fmt } from "../utils/units"
 
 const PurchaseInvoices = () => {
   const [invoicesData, setInvoicesData] = useState([]);
@@ -39,73 +40,70 @@ const PurchaseInvoices = () => {
   const { t } = useTranslation();
   const token = localStorage.getItem("authToken");
   
+  const statusColors = {
+  paid: "green", partial: "orange", pending: "yellow", received: "blue", cancelled: "red",
+};
+
   const orderColumns = useMemo(
     () => [
       { accessorKey: "invoiceID", header: t("Order-ID"), size: 100 },
       { accessorKey: "vendor.name", header: t("Supplier"), size: 150 },
-      { accessorKey: "supplier.supplierID", header: t("Supplier-ID"), size: 150 },
-      { accessorKey: "orderDate", 
-        header: t("Order-Date"), 
-        sortingFn: 'datetime',
-        size: 120,
+      // { accessorKey: "vendor.vendorID", header: t("Supplier-ID"), size: 130 },
+      {
+        id: "items",
+        header: t("Ordered-Products"),
+        size: 220,
+        enableSorting: false,
+        // searchable text: the global filter can find invoices by product name
+        accessorFn: (row) => (row.products ?? []).map((p) => p.productName).filter(Boolean).join(", "),
+        cell: ({ getValue, row }) => {
+          const n = row.original.products?.length ?? 0;
+          return <Text size="sm" lineClamp={2}>{getValue() || `${n} item${n === 1 ? "" : "s"}`}</Text>;
+        },
+      },
+      {
+        accessorKey: "orderDate",
+        header: t("Order-Date"),
+        sortingFn: "datetime",
+        size: 130,
         cell: ({ getValue }) => {
           const value = getValue();
-  
           return (
-            <Box
-              style={{
-                borderRadius: "4px",
-                padding: "4px",
-                whiteSpace: "nowrap",
-                direction: "ltr",
-                unicodeBidi: "embed",
-                textAlign: "right",
-              }}
-            >
-              {value ? moment(value).format("DD-MM-YYYY HH:MM") : "-"}
+            <Box style={{ whiteSpace: "nowrap", direction: "ltr", unicodeBidi: "embed", textAlign: "right" }}>
+              {value ? moment(value).format("DD-MM-YYYY HH:mm") : "-"}
             </Box>
           );
         },
       },
-      { accessorKey: "paymentType", header: t("Payment-Method"), size: 120 },
-      { accessorKey: "totalOrderPrice", header: t("Total-Order-Cost"), size: 120 },
-      { accessorKey: "remainingAmount", header: t("Remaining-Amount"), size: 120 },
+      { accessorKey: "paymentType", header: t("Payment-Type"), size: 120 },
       {
-        accessorKey: "isOrderPaid",
-        header: t("Is-Order-Paid"),
-        accessorFn: (row) => (row.isOrderPaid ? t("Yes") : t("No")),
+        accessorKey: "totalOrderPrice",
+        header: t("Total-Order-Cost"),
+        size: 130,
+        cell: ({ getValue }) => fmt(getValue()),
       },
-      { accessorKey: "status", 
-        header: t("Status"), 
+      {
+        accessorKey: "remainingAmount",
+        header: t("Remaining-Amount"),
+        size: 130,
+        cell: ({ getValue }) => fmt(getValue()),
+      },
+      // {
+      //   accessorKey: "isOrderPaid",
+      //   header: t("Is-Order-Paid"),
+      //   accessorFn: (row) => (row.isOrderPaid ? t("Yes") : t("No")),
+      // },
+      {
+        accessorKey: "status",
+        header: t("Status"),
         size: 120,
         cell: ({ getValue }) => {
           const value = getValue();
-
-          return (
-            <Box
-              style={{
-                backgroundColor: value === "paid" ? "#309330" : value === "pending" ? "#ebe72f" : "#e55454",
-                padding: "5px 10px",
-                borderRadius: 20,
-                textAlign: "center",
-                color: "white",
-                maxWidth: 80,
-                marginLeft: 60,
-              }}
-            >
-              { value && value.toUpperCase() }
-            </Box>
-          )
-        }
+          return value ? (
+            <Badge color={statusColors[value] ?? "gray"} variant="filled">{value.toUpperCase()}</Badge>
+          ) : null;
         },
-      // {
-      //   accessorKey: "products",
-      //   header: t("Ordered-Products"),
-      //   accessorFn: (row) =>
-      //     row.products?.length
-      //       ? row.products.map((p) => p.product.product).join(", ")
-      //       : t("No-Products"),
-      // },
+      },
     ],
     [t]
   );
@@ -460,7 +458,7 @@ const PurchaseInvoices = () => {
         setInvoiceData={setInvoiceData}
         loading={loading}
         setLoading={setLoading}
-        serOrdersData={setInvoicesData}
+        setOrdersData={setInvoicesData}
       />
       {/* <InvoiceTemplate order={invoicesData} /> */}
       {/* Modal for Invoice */}
