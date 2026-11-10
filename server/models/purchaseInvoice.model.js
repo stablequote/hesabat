@@ -2,101 +2,39 @@ const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
-  paymentMethod: { type: String, enum: ["Cash", "Bankak", "Cash + Bankak"]},
+  paymentMethod: { type: String, enum: ['Cash', 'Bankak', 'Cash + Bankak'] },
   transactionNumber: { type: String },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-  notes: {type: String}
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  notes: { type: String },
 }, { timestamps: true });
 
-const purchaseInvoiceSchema = mongoose.Schema({
-    invoiceID: {
-        type: String,
-        unique: true,
-        required: true,
-    },
-    products: [{
-        product: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-            required: true,
-        },
-        quantity: {
-            type: Number,
-            required: true,
-        },
-        unit: {
-            type: String,
-            enum: ["Kilo", "Barrel", "Piece"],
-            required: true,
-        },
-        unitPurchasePrice: {
-            type: Number,
-            required: true,
-        },
-        unitTotalPrice: {
-            type: Number,
-            required: true,
-        },
-    }],
-    vendor: { 
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor',
-        required: true
-    }, // Vendor per order
-    paymentType: {
-        type: String,
-        enum: ["advanced", "later"]
-    },
-    totalOrderPrice: {
-        type: Number,
-        required: true,
-    },
-    paidAmount: {
-        type: Number, 
-        default: 0
-    },
-    remainingAmount: { 
-        type: Number, 
-        default: 0 
-    },
-    isOrderPaid: {
-        type: Boolean,
-        default: false,
-    },
-    payments: [paymentSchema],
-    orderDate: {
-        type: Date,
-        default: Date.now(),
-        required: true,
-    },
-    deliveryDate: {
-        type: Date,
-        required: false,
-    },
-    status: {
-        type: String,
-        enum: ["paid", "cancelled", "received", "pending", "partial"]
-    },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    },
-    notes: {
-        type: String,
-    },
-}, {timestamps: true});
+const lineSchema = new mongoose.Schema({
+  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  productName: { type: String },                                 // snapshot (absent on legacy lines)
+  unit: { type: mongoose.Schema.Types.ObjectId, ref: 'Unit' },   // absent on legacy lines
+  unitName: { type: String, required: true },                    // snapshot for display
+  quantity: { type: Number, required: true },                    // in the unit that was bought
+  factor: { type: Number },                                      // snapshot (legacy: absent = 1)
+  baseQuantity: { type: Number },                                // quantity * factor
+  unitPurchasePrice: { type: Number, required: true },           // per bought unit
+  unitTotalPrice: { type: Number, required: true },
+});
 
-// purchaseInvoiceSchema.pre("save", function (next) {
-//   // auto-update status and remaining balance
-//   this.paidAmount = this.payments.reduce((sum, p) => sum + p.amount, 0);
-//   this.remainingAmount = this.totalAmount - this.paidAmount;
-//   if (this.paidAmount === 0) this.status = "pending";
-//   else if (this.paidAmount < this.totalAmount) this.status = "partial";
-//   else this.status = "paid";
-// //   next();
-// });
+const purchaseInvoiceSchema = new mongoose.Schema({
+  invoiceID: { type: String, unique: true, required: true },
+  products: [lineSchema],
+  vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
+  paymentType: { type: String, enum: ['advanced', 'later'] },
+  totalOrderPrice: { type: Number, required: true },
+  paidAmount: { type: Number, default: 0 },
+  remainingAmount: { type: Number, default: 0 },
+  isOrderPaid: { type: Boolean, default: false },
+  payments: [paymentSchema],
+  orderDate: { type: Date, default: Date.now, required: true }, // was Date.now() (evaluated once at startup)
+  deliveryDate: { type: Date },
+  status: { type: String, enum: ['paid', 'cancelled', 'received', 'pending', 'partial'] },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  notes: { type: String },
+}, { timestamps: true });
 
 module.exports = mongoose.model('PurchaseInvoice', purchaseInvoiceSchema);
