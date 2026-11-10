@@ -4,6 +4,40 @@ const Product = require("../models/product.model");
 const Vendor = require("../models/vendor.model");
 const Inventory = require("../models/inventory.model");
 
+const Unit = require('../models/unit.model');
+const { addStock, toBase } = require('../services/stock.service');
+const { nextInvoiceId } = require('../utils/invoiceNumber');
+const HttpError = require('../utils/httpError');
+const handleError = require('../utils/handleError');
+const { round2 } = require('../utils/money');
+
+const METHODS = ['Cash', 'Bankak', 'Cash + Bankak'];
+
+function parseDate(value, label) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) throw new HttpError(`Invalid ${label}.`);
+  return d;
+}
+
+// amounts are validated here; zero-amount rows are dropped
+function normalizePayments(payments, userId) {
+  const out = [];
+  for (const p of payments ?? []) {
+    const amount = round2(Number(p.amount) || 0);
+    if (amount < 0) throw new HttpError('Payment amounts cannot be negative.');
+    if (amount === 0) continue;
+    if (!METHODS.includes(p.paymentMethod)) throw new HttpError('Invalid payment method.');
+    const transactionNumber =
+      p.paymentMethod === 'Bankak' ? String(p.transactionNumber ?? '').trim() : undefined;
+    if (p.paymentMethod === 'Bankak' && !transactionNumber) {
+      throw new HttpError('Bankak payments require a transaction number.');
+    }
+    out.push({ amount, paymentMethod: p.paymentMethod, transactionNumber, notes: p.notes, createdBy: userId });
+  }
+  return out;
+}
+
 /**
  * =========================================================
  * CREATE PURCHASE INVOICE
@@ -179,207 +213,328 @@ const Inventory = require("../models/inventory.model");
 //   }
 // };
 
+
 exports.createPurchaseInvoice = async (req, res) => {
   const session = await mongoose.startSession();
-
   try {
-    session.startTransaction();
+    let invoice;
+    await session.withTransaction(async () => {
+      const { products, vendor, paymentType, orderDate, deliveryDate, notes } = req.body;
 
-    const {
-      products,
-      vendor,
-      paymentType,
-      payments = [],
-      orderDate,
-      deliveryDate,
-      notes,
-    } = req.body;
-
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      throw new Error("Products are required");
-    }
-
-    if (!vendor) {
-      throw new Error("Vendor is required");
-    }
-
-    // ✅ validate vendor
-    const existingVendor = await Vendor.findById(vendor).session(session);
-    if (!existingVendor) {
-      throw new Error("Vendor not found");
-    }
-
-    // ✅ generate order ID safely
-    const latestInvoice = await PurchaseInvoice.findOne()
-      .sort({ createdAt: -1 })
-      .session(session);
-
-    let nextNumber = 1;
-
-    if (latestInvoice && latestInvoice.invoiceID) {
-      const parts = latestInvoice.invoiceID.split("-");
-      nextNumber = Number(parts[1]) + 1 || 1;
-    }
-
-    const invoiceID = `PO-${String(nextNumber).padStart(5, "0")}`;
-
-    let calculatedTotal = 0;
-    const formattedProducts = [];
-
-    /**
-     * =========================================================
-     * LOOP PRODUCTS
-     * =========================================================
-     */
-    for (const item of products) {
-      if (!item.product) {
-        throw new Error("Product ID is required");
+      if (!vendor) throw new HttpError('Vendor is required.');
+      if (!Array.isArray(products) || products.length === 0) {
+        throw new HttpError('Products are required.');
+      }
+      if (!['advanced', 'later'].includes(paymentType)) {
+        throw new HttpError('Payment type must be "advanced" or "later".');
       }
 
-      const existingProduct = await Product.findById(item.product).session(session);
+      const existingVendor = await Vendor.findById(vendor).session(session);
+      if (!existingVendor) throw new HttpError('Vendor not found.', 404);
 
-      if (!existingProduct) {
-        throw new Error(`Product not found: ${item.product}`);
-      }
+      const invoiceId = new mongoose.Types.ObjectId();
+      let total = 0;
+      const lines = [];
 
-      const quantity = Number(item.quantity);
-      const unitPurchasePrice = Number(item.unitPurchasePrice);
+      for (const item of products) {
+        if (!item.product || !item.unit) throw new HttpError('Each line needs a product and a unit.');
 
-      if (quantity <= 0 || unitPurchasePrice < 0) {
-        throw new Error("Invalid quantity or price");
-      }
+        const product = await Product.findById(item.product).session(session);
+        if (!product) throw new HttpError('Product not found.', 404);
 
-      const unitTotalPrice = quantity * unitPurchasePrice;
-      calculatedTotal += unitTotalPrice;
+        const quantity = Number(item.quantity);
+        const unitPurchasePrice = Number(item.unitPurchasePrice);
+        if (!(unitPurchasePrice >= 0)) throw new HttpError(`Invalid price for "${product.name}".`);
 
-      /**
-       * =========================================================
-       * INVENTORY LOGIC (CORRECT)
-       * =========================================================
-       */
+        // validates that the unit belongs to the product and the quantity is valid
+        const { base, level } = toBase(product, item.unit, quantity);
 
-      let inventory = await Inventory.findOne({
-        product: item.product,
-        unit: item.unit,
-      }).session(session);
+        const unitDoc = await Unit.findById(item.unit).select('name').session(session).lean();
 
-      if (!inventory) {
-        // ✅ create new inventory record
-        inventory = new Inventory({
-          product: item.product,
-          quantity: quantity,
-          unit: item.unit,
-          unitPurchasePrice: unitPurchasePrice,
-          unitSalePrice: item.unitSalePrice || unitPurchasePrice,
-          location: item.location || "default",
+        await addStock({
+          product,
+          unitId: item.unit,
+          quantity,
+          type: 'purchase',
+          costPerBase: unitPurchasePrice / level.factor, // feeds the weighted average
+          reference: { kind: 'PurchaseInvoice', id: invoiceId },
+          session,
         });
-      } else {
-        // ✅ update existing inventory (weighted average)
-        const oldQty = inventory.quantity;
-        const oldPrice = inventory.unitPurchasePrice;
 
-        const totalOldValue = oldQty * oldPrice;
-        const totalNewValue = quantity * unitPurchasePrice;
+        const unitTotalPrice = round2(quantity * unitPurchasePrice);
+        total += unitTotalPrice;
 
-        const newQuantity = oldQty + quantity;
-
-        inventory.unitPurchasePrice =
-          (totalOldValue + totalNewValue) / newQuantity;
-
-        inventory.quantity = newQuantity;
+        lines.push({
+          product: product._id,
+          productName: product.name,
+          unit: item.unit,
+          unitName: unitDoc?.name ?? '',
+          quantity,
+          factor: level.factor,
+          baseQuantity: base,
+          unitPurchasePrice,
+          unitTotalPrice,
+        });
       }
 
-      await inventory.save({ session });
+      const totalOrderPrice = round2(total);
+      const payments = normalizePayments(req.body.payments, req.user._id);
+      const paidAmount = round2(payments.reduce((s, p) => s + p.amount, 0));
 
-      /**
-       * =========================================================
-       * SNAPSHOT FOR INVOICE
-       * =========================================================
-       */
-      formattedProducts.push({
-        product: existingProduct._id,
-        quantity,
-        unit: item.unit,
-        unitPurchasePrice,
-        unitTotalPrice,
+      if (paidAmount - totalOrderPrice > 0.005) throw new HttpError('Overpayment not allowed.');
+
+      const remainingAmount = round2(totalOrderPrice - paidAmount);
+      const status = paidAmount === 0 ? 'pending' : remainingAmount > 0 ? 'partial' : 'paid';
+
+      const invoiceID = await nextInvoiceId({
+        Model: PurchaseInvoice, counterKey: 'purchaseInvoice', prefix: 'PO', session,
       });
-    }
 
-    /**
-     * =========================================================
-     * PAYMENTS
-     * =========================================================
-     */
-
-    const paidAmount = payments.reduce(
-      (sum, p) => sum + Number(p.amount || 0),
-      0
-    );
-
-    if (paidAmount < 0) {
-      throw new Error("Invalid payment amount");
-    }
-
-    const remainingAmount = calculatedTotal - paidAmount;
-
-    let status = "partial";
-
-    if (paidAmount === 0) {
-      status = "pending";
-    } else if (remainingAmount <= 0) {
-      status = "paid";
-    } else {
-      status = "partial"
-    }
-
-    /**
-     * =========================================================
-     * CREATE INVOICE
-     * =========================================================
-     */
-
-    const invoice = await PurchaseInvoice.create(
-      [
-        {
+      [invoice] = await PurchaseInvoice.create(
+        [{
+          _id: invoiceId,
           invoiceID,
-          products: formattedProducts,
+          products: lines,
           vendor,
           paymentType,
           payments,
-          totalOrderPrice: calculatedTotal,
+          totalOrderPrice,
           paidAmount,
           remainingAmount,
           isOrderPaid: remainingAmount <= 0,
-          orderDate,
-          deliveryDate,
+          orderDate: parseDate(orderDate, 'order date'),
+          deliveryDate: parseDate(deliveryDate, 'delivery date'),
           status,
           notes,
           createdBy: req.user._id,
-        },
-      ],
-      { session }
-    );
+        }],
+        { session }
+      );
+    });
 
-    await session.commitTransaction();
+    // invoice.populate('createdBy')
+
+    // Populate client information
+    await invoice.populate({
+      path: 'vendor',
+      select: 'name',
+      options: { session },
+    });
 
     return res.status(201).json({
       success: true,
-      message: "Purchase invoice created successfully",
-      invoice: invoice[0],
+      message: 'Purchase invoice created successfully',
+      invoice,
     });
-
   } catch (error) {
-    await session.abortTransaction();
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    return handleError(res, error, 'createPurchaseInvoice');
   } finally {
     session.endSession();
   }
 };
+
+// pre-claude working version
+// exports.createPurchaseInvoice = async (req, res) => {
+//   const session = await mongoose.startSession();
+
+//   try {
+//     session.startTransaction();
+
+//     const {
+//       products,
+//       vendor,
+//       paymentType,
+//       payments = [],
+//       orderDate,
+//       deliveryDate,
+//       notes,
+//     } = req.body;
+
+//     if (!products || !Array.isArray(products) || products.length === 0) {
+//       throw new Error("Products are required");
+//     }
+
+//     if (!vendor) {
+//       throw new Error("Vendor is required");
+//     }
+
+//     // ✅ validate vendor
+//     const existingVendor = await Vendor.findById(vendor).session(session);
+//     if (!existingVendor) {
+//       throw new Error("Vendor not found");
+//     }
+
+//     // ✅ generate order ID safely
+//     const latestInvoice = await PurchaseInvoice.findOne()
+//       .sort({ createdAt: -1 })
+//       .session(session);
+
+//     let nextNumber = 1;
+
+//     if (latestInvoice && latestInvoice.invoiceID) {
+//       const parts = latestInvoice.invoiceID.split("-");
+//       nextNumber = Number(parts[1]) + 1 || 1;
+//     }
+
+//     const invoiceID = `PO-${String(nextNumber).padStart(5, "0")}`;
+
+//     let calculatedTotal = 0;
+//     const formattedProducts = [];
+
+//     /**
+//      * =========================================================
+//      * LOOP PRODUCTS
+//      * =========================================================
+//      */
+//     for (const item of products) {
+//       if (!item.product) {
+//         throw new Error("Product ID is required");
+//       }
+
+//       const existingProduct = await Product.findById(item.product).session(session);
+
+//       if (!existingProduct) {
+//         throw new Error(`Product not found: ${item.product}`);
+//       }
+
+//       const quantity = Number(item.quantity);
+//       const unitPurchasePrice = Number(item.unitPurchasePrice);
+
+//       if (quantity <= 0 || unitPurchasePrice < 0) {
+//         throw new Error("Invalid quantity or price");
+//       }
+
+//       const unitTotalPrice = quantity * unitPurchasePrice;
+//       calculatedTotal += unitTotalPrice;
+
+//       /**
+//        * =========================================================
+//        * INVENTORY LOGIC (CORRECT)
+//        * =========================================================
+//        */
+
+//       let inventory = await Inventory.findOne({
+//         product: item.product,
+//         unit: item.unit,
+//       }).session(session);
+
+//       if (!inventory) {
+//         // ✅ create new inventory record
+//         inventory = new Inventory({
+//           product: item.product,
+//           quantity: quantity,
+//           unit: item.unit,
+//           unitPurchasePrice: unitPurchasePrice,
+//           unitSalePrice: item.unitSalePrice || unitPurchasePrice,
+//           location: item.location || "default",
+//         });
+//       } else {
+//         // ✅ update existing inventory (weighted average)
+//         const oldQty = inventory.quantity;
+//         const oldPrice = inventory.unitPurchasePrice;
+
+//         const totalOldValue = oldQty * oldPrice;
+//         const totalNewValue = quantity * unitPurchasePrice;
+
+//         const newQuantity = oldQty + quantity;
+
+//         inventory.unitPurchasePrice =
+//           (totalOldValue + totalNewValue) / newQuantity;
+
+//         inventory.quantity = newQuantity;
+//       }
+
+//       await inventory.save({ session });
+
+//       /**
+//        * =========================================================
+//        * SNAPSHOT FOR INVOICE
+//        * =========================================================
+//        */
+//       formattedProducts.push({
+//         product: existingProduct._id,
+//         quantity,
+//         unit: item.unit,
+//         unitPurchasePrice,
+//         unitTotalPrice,
+//       });
+//     }
+
+//     /**
+//      * =========================================================
+//      * PAYMENTS
+//      * =========================================================
+//      */
+
+//     const paidAmount = payments.reduce(
+//       (sum, p) => sum + Number(p.amount || 0),
+//       0
+//     );
+
+//     if (paidAmount < 0) {
+//       throw new Error("Invalid payment amount");
+//     }
+
+//     const remainingAmount = calculatedTotal - paidAmount;
+
+//     let status = "partial";
+
+//     if (paidAmount === 0) {
+//       status = "pending";
+//     } else if (remainingAmount <= 0) {
+//       status = "paid";
+//     } else {
+//       status = "partial"
+//     }
+
+//     /**
+//      * =========================================================
+//      * CREATE INVOICE
+//      * =========================================================
+//      */
+
+//     const invoice = await PurchaseInvoice.create(
+//       [
+//         {
+//           invoiceID,
+//           products: formattedProducts,
+//           vendor,
+//           paymentType,
+//           payments,
+//           totalOrderPrice: calculatedTotal,
+//           paidAmount,
+//           remainingAmount,
+//           isOrderPaid: remainingAmount <= 0,
+//           orderDate,
+//           deliveryDate,
+//           status,
+//           notes,
+//           createdBy: req.user._id,
+//         },
+//       ],
+//       { session }
+//     );
+
+//     await session.commitTransaction();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Purchase invoice created successfully",
+//       invoice: invoice[0],
+//     });
+
+//   } catch (error) {
+//     await session.abortTransaction();
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+
+//   } finally {
+//     session.endSession();
+//   }
+// };
 
 /**
  * =========================================================
@@ -432,6 +587,7 @@ exports.getPurchaseInvoices = async (req, res) => {
       .populate("vendor", "name phone")
       .populate("createdBy", "firstName lastName")
       .populate("products.product", "_id name")
+      .populate("products.unit", "_id name")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
