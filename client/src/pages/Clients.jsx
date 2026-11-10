@@ -8,6 +8,8 @@ import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-react';
 import AddClientModal from '../components/AddClientModal';
 import EditClientModal from '../components/EditClientModal';
 import TanStackTable from '../components/TanStackTable';
+import PageHeader from '../components/PageHeader';
+import { RowActions, DateTimeCell } from '../components/TableCells';
 
 export const clientsSeed = [
   {
@@ -80,46 +82,58 @@ function Clients() {
 
   const BASE_URL = import.meta.env.VITE_URL;
 
-  const columns = useMemo( () =>
-    [
-      {
-      accessorKey: "fullName",
-      header: "Client Name",
+  // const columns = useMemo( () =>
+  //   [
+  //     {
+  //     accessorKey: "fullName",
+  //     header: "Client Name",
       
-    },
-    {
-      accessorFn: (row) => row.contactDetails?.location || "—",
-      id: "location",
-      header: "Location",
-    },
-    {
-      accessorFn: (row) => row.contactDetails?.phone || "—",
-      id: "phone",
-      header: "Phone",
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Added on",
-      cell: ({ getValue }) => {
-        const value = getValue();
+  //   },
+  //   {
+  //     accessorFn: (row) => row.contactDetails?.location || "—",
+  //     id: "location",
+  //     header: "Location",
+  //   },
+  //   {
+  //     accessorFn: (row) => row.contactDetails?.phone || "—",
+  //     id: "phone",
+  //     header: "Phone",
+  //   },
+  //   {
+  //     accessorKey: "createdAt",
+  //     header: "Added on",
+  //     cell: ({ getValue }) => {
+  //       const value = getValue();
 
-        return (
-          <Box
-            style={{
-              borderRadius: "4px",
-              padding: "4px",
-              whiteSpace: "nowrap",
-              direction: "ltr",
-              unicodeBidi: "embed",
-              textAlign: "right",
-            }}
-          >
-            {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
-          </Box>
-        );
-      },
-    },
-  ])
+  //       return (
+  //         <Box
+  //           style={{
+  //             borderRadius: "4px",
+  //             padding: "4px",
+  //             whiteSpace: "nowrap",
+  //             direction: "ltr",
+  //             unicodeBidi: "embed",
+  //             textAlign: "right",
+  //           }}
+  //         >
+  //           {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
+  //         </Box>
+  //       );
+  //     },
+  //   },
+  // ])
+
+  // order matches the design: name, phone, location, added on
+  
+  const columns = useMemo(() => [
+    { accessorKey: "fullName", header: "Client name",
+      cell: ({ getValue }) => <span className="tc-strong">{getValue()}</span> },
+    { accessorFn: (row) => row.contactDetails?.phone || "—", id: "phone", header: "Phone" },
+    { accessorFn: (row) => row.contactDetails?.location || "—", id: "location", header: "Location" },
+    { accessorKey: "createdAt", header: "Added on",
+      cell: ({ getValue }) => <DateTimeCell value={getValue()} /> },
+  ], []);
+
 
   const customTableOptions = {
     renderRowActions: ({ row }) => {
@@ -205,12 +219,12 @@ function Clients() {
         })
         setOpened(false)
       }
-      setClientsData([...prev, res.data])
+      setClientsData(prev => [...prev, res.data.newClient])
       // window.location.reload()
     } catch (error) {
       showNotification({
         title: 'Error creating a merchant',
-        message: error,
+        message: error.message,
         color: 'red'
       })
     }
@@ -220,18 +234,23 @@ function Clients() {
     const confirmDialog = window.confirm("هل أنت متأكد من حذف هذا العميل؟")
     if(!confirmDialog) return;
       try {
-        const clientId = row.original._id
-        console.log(clientId)
+        const clientId = row.original._id;
+        
         const url = `${BASE_URL}/clients/delete/${clientId}`
-        const res = await axios.delete(url)
+        const res = await axios.delete(url);
+
         if(res.status === 200) {
+          setClientsData(prev =>
+            prev.filter(client => client._id !== clientId)
+          );
+
           showNotification({
             title: "Success",
             message: "Merchant successfully deleted",
             color: "green"
           })
         }
-        setClientsData(res.data)
+        
         // window.location.reload()
     } catch (error) {
       showNotification({
@@ -332,43 +351,56 @@ function Clients() {
     }
   };
 
-  const actionsColumn = {
-    id: "actions",
-    header: () => <Box ta="center">Actions</Box>,
+  // const actionsColumn = {
+  //   id: "actions",
+  //   header: () => <Box ta="center">Actions</Box>,
 
-    cell: ({ row }) => (
-      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+  //   cell: ({ row }) => (
+  //     <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
         
-        {/* EDIT */}
-        <Tooltip label="Edit" >
-          <ActionIcon 
-            variant="light"
-            color="blue"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleEditClick(row.original)
-            }}
-          >
-            <IconEdit size={26} />
-          </ActionIcon>
-        </Tooltip>
+  //       {/* EDIT */}
+  //       <Tooltip label="Edit" >
+  //         <ActionIcon 
+  //           variant="light"
+  //           color="blue"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleEditClick(row.original)
+  //           }}
+  //         >
+  //           <IconEdit size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
 
-        {/* DELETE */}
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="light"
-            color="red"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleDeleteMerchant(row)
-            }}
-          >
-            <IconTrash size={26} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
-    ),
-  };
+  //       {/* DELETE */}
+  //       <Tooltip label="Delete">
+  //         <ActionIcon
+  //           variant="light"
+  //           color="red"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleDeleteMerchant(row)
+  //           }}
+  //         >
+  //           <IconTrash size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
+  //     </Group>
+  //   ),
+  // };
+
+  
+  const actionsColumn = {
+  id: "actions",
+  header: "Actions",
+  cell: ({ row }) => (
+    <RowActions
+      onEdit={() => handleEditClick(row.original)}
+      onDelete={() => handleDeleteMerchant(row)}
+    />
+  ),
+};
+
 
   const customToolbarOptions = {
     
@@ -376,33 +408,18 @@ function Clients() {
 
   return (
     <Container size="100%">
-      <Button mb='sm' variant="filled" color="green" aria-label="create client" size="lg" onClick={() => setOpened(!opened)}>Add Client</Button>
-      {/* <CustomTable 
-        columns={columns} 
-        data={clientsSeed}
-        // renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
-        renderRowActions={customTableOptions.renderRowActions}
-        // onRowSelectionChange={customTableOptions.onRowSelectionChange}
-        onRowClick={(row) => setSelectedResult(row)}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-        checkedRow={checkedRow}
-        setCheckedRow={setCheckedRow}
-      />
-      <Box my={80}>
+      {/* <Button mb='sm' variant="filled" color="green" aria-label="create client" size="lg" radius={12} onClick={() => setOpened(!opened)}>Add Client</Button> */}
 
-      </Box> */}
+      <PageHeader
+        title="Clients"
+        subtitle={`${clientsData.length} clients`}
+        actionLabel="Add client"
+        onAction={() => setOpened(true)}
+      />
+
       <TanStackTable
         data={clientsData}
         columns={columns}
-        renderRowActions={(row) => (
-          <>
-            <Button size="xs">Edit</Button>
-            <Button size="xs" color="red">
-              Delete
-            </Button>
-          </>
-        )}
         actionsColumn={actionsColumn}
         customToolbarOptions={customToolbarOptions}
         onSelectionChange={setCheckedRow}

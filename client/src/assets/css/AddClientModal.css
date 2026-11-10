@@ -1,0 +1,151 @@
+/* AddClientModal.css
+   Same tokens and component styling as the sale invoice modal design.
+   Scoped under .acm-content (the Mantine Modal's content element); selectors use
+   two classes on purpose so they win over Mantine's single-class rules.
+   Logical properties are used throughout, so RTL works. */
+
+.acm-content.mantine-Modal-content {
+  --acm-ink: #212529;
+  --acm-sub: #495057;
+  --acm-muted: #5c636a;
+  --acm-line: #e9ecef;
+  --acm-field: #ced4da;
+  --acm-blue: #1971c2;
+  --acm-blue-hover: #1864ab;
+  --acm-danger: #c92a2a;
+
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.3);
+  color: var(--acm-ink);
+  font-family: Inter, var(--mantine-font-family), system-ui, sans-serif;
+}
+
+/* ---------- header ---------- */
+.acm-content .mantine-Modal-header {
+  height: 64px;
+  min-height: 64px;
+  padding-block: 0;
+  padding-inline: 24px 10px;
+  border-bottom: 1px solid var(--acm-line);
+}
+.acm-content .mantine-Modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--acm-ink);
+}
+.acm-content .mantine-Modal-close {
+  --cb-size: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--acm-sub);
+}
+.acm-content .mantine-Modal-body {
+  padding: 0;
+}
+
+/* ---------- form ---------- */
+.acm-form {
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.acm-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.acm-content .mantine-InputWrapper-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--acm-sub);
+}
+.acm-content .mantine-Input-input {
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--acm-field);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--acm-ink);
+  padding-inline-end: 36px;
+}
+.acm-content .mantine-Input-input::placeholder {
+  color: var(--acm-muted);
+  opacity: 1;
+}
+.acm-content .mantine-Input-input:focus {
+  border-color: var(--acm-blue);
+  box-shadow: 0 0 0 2px rgba(25, 113, 194, 0.22);
+}
+.acm-content .mantine-Input-input[data-error] {
+  border-color: var(--acm-danger);
+  color: var(--acm-ink);
+}
+.acm-content .mantine-InputWrapper-error {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--acm-danger);
+}
+
+/* ---------- footer ---------- */
+.acm-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}
+.acm-btn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--acm-field);
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--acm-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.acm-btn:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+.acm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.acm-pri {
+  flex: 1;
+  background: var(--acm-blue);
+  border-color: var(--acm-blue);
+  color: #fff;
+}
+.acm-pri:hover:not(:disabled) {
+  background: var(--acm-blue-hover);
+}
+.acm-content button:focus-visible {
+  outline: 2px solid var(--acm-blue);
+  outline-offset: 2px;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 560px) {
+  .acm-form {
+    padding: 16px;
+  }
+  .acm-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

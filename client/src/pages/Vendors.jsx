@@ -8,6 +8,8 @@ import { IconEdit, IconPlusFilled, IconTicket, IconTrash } from '@tabler/icons-r
 import AddVendorModal from '../components/AddVendorModal';
 import EditVendorModal from '../components/EditVendorModal';
 import TanStackTable from '../components/TanStackTable';
+import PageHeader from '../components/PageHeader';
+import { RowActions, DateTimeCell } from '../components/TableCells';
 
 function Vendors() {
   const [vendorsData, setVendorsData] = useState([]);
@@ -41,19 +43,28 @@ function Vendors() {
 
   const BASE_URL = import.meta.env.VITE_URL;
 
-  const columns = useMemo(() =>
-    [
-      { accessorKey: "name", header: "Vendor Name" },
-      { accessorKey: "vendorID", header: "Vendor ID" },
-      { accessorKey: "contactDetails.location", header: "Location" },
-      { accessorKey: "contactDetails.phone", header: "Phone" },
-      // { accessorKey: "createdAt", header: "Added on", 
-      //   Cell: ({ cell }) => (
-      //     <Box>{moment(cell.getValue()).format("DD-MM-YYYY h:mm a")}</Box>
-      //   )
-      // },
-    ]
-  )
+  // const columns = useMemo(() =>
+  //   [
+  //     { accessorKey: "name", header: "Vendor Name" },
+  //     { accessorKey: "vendorID", header: "Vendor ID" },
+  //     { accessorKey: "contactDetails.location", header: "Location" },
+  //     { accessorKey: "contactDetails.phone", header: "Phone" },
+  //     // { accessorKey: "createdAt", header: "Added on", 
+  //     //   Cell: ({ cell }) => (
+  //     //     <Box>{moment(cell.getValue()).format("DD-MM-YYYY h:mm a")}</Box>
+  //     //   )
+  //     // },
+  //   ]
+  // )
+
+  const columns = useMemo(() => [
+    { accessorKey: "name", header: "Vendor Name",
+      cell: ({ getValue }) => <span className="tc-strong">{getValue()}</span> },
+    { accessorFn: (row) => row.contactDetails?.phone || "—", id: "phone", header: "Phone" },
+    { accessorFn: (row) => row.contactDetails?.location || "—", id: "location", header: "Location" },
+    { accessorKey: "createdAt", header: "Added on",
+      cell: ({ getValue }) => <DateTimeCell value={getValue()} /> },
+  ], []);
 
   const customTableOptions = {
     renderRowActions: ({ row }) => {
@@ -155,22 +166,27 @@ function Vendors() {
     const confirmDialog = window.confirm("هل أنت متأكد؟")
     if(!confirmDialog) return;
       try {
-        const id = row.original._id
-        console.log(id)
-        const url = `${BASE_URL}/vendors/delete/${id}`
-        const res = await axios.delete(url)
+        const id = row.original._id;
+   
+        const url = `${BASE_URL}/vendors/delete/${id}`;
+        const res = await axios.delete(url);
+
         if(res.status === 200) {
+          setVendorsData(prev =>
+            prev.filter(vendor => vendor._id !== id)
+          );
+
           showNotification({
             title: "Success",
             message: "Vendor successfully deleted",
             color: "green"
           })
         }
-        window.location.reload()
+        // window.location.reload()
     } catch (error) {
       showNotification({
         title: "Error",
-        message: "Error occured while deleting vendor",
+        message: error.message,
         color: "red"
       })
     }
@@ -263,48 +279,59 @@ function Vendors() {
     }
   };
 
+  // const actionsColumn = {
+  //   id: "actions",
+  //   header: () => <Box ta="center">Actions</Box>,
+
+  //   cell: ({ row }) => (
+  //     <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+  //       {/* EDIT */}
+  //       <Tooltip label="Edit" >
+  //         <ActionIcon
+  //           variant="light"
+  //           color="blue"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleEditClick(row.original)
+  //           }}
+  //         >
+  //           <IconEdit size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
+
+  //       {/* DELETE */}
+  //       <Tooltip label="Delete">
+  //         <ActionIcon
+  //           variant="light"
+  //           color="red"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleDeleteVendor(row)
+  //           }}
+  //         >
+  //           <IconTrash size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
+  //     </Group>
+  //   ),
+  // };
+
   const actionsColumn = {
     id: "actions",
-    header: () => <Box ta="center">Actions</Box>,
-
+    header: "Actions",
     cell: ({ row }) => (
-      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
-        
-        {/* EDIT */}
-        <Tooltip label="Edit" >
-          <ActionIcon
-            variant="light"
-            color="blue"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleEditClick(row.original)
-            }}
-          >
-            <IconEdit size={26} />
-          </ActionIcon>
-        </Tooltip>
-
-        {/* DELETE */}
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="light"
-            color="red"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleDeleteVendor(row)
-            }}
-          >
-            <IconTrash size={26} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+      <RowActions
+        onEdit={() => handleEditClick(row.original)}
+        onDelete={() => handleDeleteVendor(row)}
+      />
     ),
   };
 
   const customToolbarOptions = {
     exportClientsToExcel: (checkedRow) =>
      <Button 
-        color="blue" 
+        color="#1971c2" 
         // disabled={checkedRow?.length === 0} 
         onClick={() => {
           console.log("checked row: ", checkedRow)
@@ -315,7 +342,7 @@ function Vendors() {
     ,
     exportSelectedClientsToExcel: (checkedRow) =>
      <Button 
-        color="blue" 
+        color="#1971c2" 
         disabled={checkedRow?.length === 0} 
         onClick={() => {
           console.log("checked row: ", checkedRow)
@@ -328,7 +355,15 @@ function Vendors() {
   
   return (
     <Container size="100%">
-      <Button mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" onClick={() => setOpened(!opened)}>Create Vendor</Button>
+      {/* <Button mb='sm' variant="filled" color="green" aria-label="create vendor" size="lg" radius={12} onClick={() => setOpened(!opened)}>Create Vendor</Button> */}
+       
+        <PageHeader
+          title="Vendors"
+          subtitle={`${vendorsData.length} vendors`}
+          actionLabel="Add Vendor"
+          onAction={() => setOpened(true)}
+        />
+
        <TanStackTable
         data={vendorsData}
         columns={columns}

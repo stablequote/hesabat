@@ -1,0 +1,146 @@
+/* OrderForm.css
+   Purchase-order variant of the shared invoice-modal design (CreateSaleInvoiceModal.css).
+   That file provides the layout, fields, stepper, summary panel and buttons; this one only
+   changes the accent colour to orange and adds the header, required marks and the
+   purchase column order. No external fonts or resources. Logical properties throughout. */
+
+.of-content.csi-content.mantine-Modal-content {
+  /* re-colour the shared design: blue -> orange */
+  --csi-blue: #cf430c;        /* button (slightly darker than #d9480f so white text passes AA) */
+  --csi-blue-hover: #b93a09;
+  --csi-blue-ink: #a63a07;    /* "Add another product" text, text buttons */
+  --csi-sel: #ffe8cc;         /* selected segment */
+  --csi-sel-ink: #a63a07;
+  --csi-chip-bg: #fff4e6;
+  --csi-chip-line: #ffd8a8;
+
+  --of-accent: #d9480f;       /* top bar, focus */
+  --of-badge-bg: #ffe8cc;
+  --of-badge-ink: #a63a07;
+  --of-req: #c92a2a;
+
+  position: relative;
+}
+
+/* accent bar across the top */
+.of-content.csi-content.mantine-Modal-content::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 4px;
+  background: var(--of-accent);
+  pointer-events: none;
+}
+
+/* ---------- header ---------- */
+.of-content .of-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px 15px;
+  border-bottom: 1px solid var(--csi-line);
+}
+.of-content .of-badge {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--of-badge-bg);
+  color: var(--of-badge-ink);
+}
+.of-content .of-titles {
+  flex: 1;
+  min-width: 0;
+}
+.of-content .of-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--csi-ink);
+}
+.of-content .of-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--csi-muted);
+}
+.of-content .of-close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin-inline-end: -10px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--csi-sub);
+  cursor: pointer;
+}
+.of-content .of-close:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+.of-content .of-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- required mark, dates ---------- */
+.of-content .of-req {
+  color: var(--of-req);
+}
+.of-content .of-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ---------- fields: orange focus, grey disabled ---------- */
+.of-content .mantine-Input-input:focus {
+  border-color: var(--of-accent);
+  box-shadow: 0 0 0 2px rgba(217, 72, 15, 0.22);
+}
+.of-content .mantine-Input-input:disabled {
+  background: #f1f3f5;
+  color: #868e96;
+  border-color: var(--csi-field);
+}
+.of-content .mantine-Input-input:disabled::placeholder {
+  color: #868e96;
+}
+
+/* ---------- product rows: product | qty | unit | price | total | remove ---------- */
+@media (min-width: 861px) {
+  .of-content .csi-th,
+  .of-content .csi-it {
+    grid-template-columns: minmax(0, 1fr) 108px 110px 100px 80px 40px;
+  }
+}
+.of-content .csi-q {
+  padding: 0 4px;
+}
+.of-content .csi-q > button {
+  width: 32px;
+  height: 32px;
+}
+/* the last remaining line can't be removed */
+.of-content .csi-ib:disabled {
+  background: #f1f3f5;
+  color: #868e96;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .of-content .of-dates {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .of-content .of-head {
+    padding-inline: 16px;
+  }
+}
