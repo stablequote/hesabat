@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip, Badge, Text } from '@mantine/core';
+import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip, Badge, Text, Loader, Center } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { IconDoorExit, IconDownload, IconEdit, IconHistory, IconMedicalCrossCircle, IconMoneybagMove, IconPdf, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
@@ -140,7 +140,8 @@ const PurchaseInvoices = () => {
     }
   };
 
-  const fetchInvoices = async () => {    
+  const fetchInvoices = async () => {   
+    setLoading(true) 
     try {
       const url = `${BASE_URL}/purchase-invoices/list`;
       const response = await axios.get(url, {
@@ -152,6 +153,8 @@ const PurchaseInvoices = () => {
       setInvoicesData(response.data.invoices);
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -484,6 +487,12 @@ const PurchaseInvoices = () => {
         SUBMIT_URL={purchaseInvoiceInstallmentUrl}
         onSuccess={handleInvoiceUpdate}
       />
+      {
+        loading && 
+        <Center>
+          <Loader size={36} variant="dots" color="green" />
+        </Center>
+      }
     </Box>
   );
 };
