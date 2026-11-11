@@ -482,3 +482,51 @@
   .csi-c-total { grid-area: total; justify-content: flex-start; }
   .csi-c-del { grid-area: del; justify-self: end; }
 }
+
+/* ===== layout fixes ===== */
+
+.csi-right-scroll > *,
+.csi-left > * {
+  flex-shrink: 0;
+}
+
+/* Desktop: the modal grows with its content (min 660px, capped to the viewport). */
+.csi-content.mantine-Modal-content {
+  height: auto;
+  min-height: min(660px, calc(100vh - 2 * var(--modal-y-offset, 5vh)));
+  min-height: min(660px, calc(100dvh - 2 * var(--modal-y-offset, 5dvh)));
+  max-height: calc(100vh - 2 * var(--modal-y-offset, 5vh));
+  max-height: calc(100dvh - 2 * var(--modal-y-offset, 5dvh));
+}
+.csi-grid {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* Mobile: stack the columns in normal flow and scroll the whole body. */
+@media (max-width: 860px) {
+  .csi-content.mantine-Modal-content {
+    height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .csi-grid {
+    display: block;
+    grid-template-rows: none;
+    overflow-y: auto;
+  }
+  .csi-right-scroll {
+    flex: none;
+    overflow: visible;
+  }
+  .csi-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--csi-surface);
+    border-top: 1px solid var(--csi-line);
+  }
+  .csi-footer .csi-btn {
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+}
