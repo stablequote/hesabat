@@ -1,0 +1,520 @@
+/* AddInstallmentModal.css
+   Self-contained styles for the installment modal (sale and purchase invoices).
+   No external fonts or resources: Inter is used only if it is already installed,
+   otherwise the app's Mantine font. Logical properties throughout, so it mirrors in RTL.
+   Selectors use two classes on purpose, to win over Mantine's rules and global element rules. */
+
+.aim-content.mantine-Modal-content {
+  --aim-ink: #212529;
+  --aim-sub: #495057;
+  --aim-muted: #5c636a;
+  --aim-line: #e9ecef;
+  --aim-field: #ced4da;
+  --aim-surface: #f8f9fa;
+  --aim-blue: #1971c2;
+  --aim-blue-hover: #1864ab;
+  --aim-sel: #d0ebff;
+  --aim-sel-ink: #0b4a7d;
+  --aim-danger: #c92a2a;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: calc(100vh - 2 * var(--modal-y-offset, 5vh));
+  max-height: calc(100dvh - 2 * var(--modal-y-offset, 5dvh));
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.3);
+  color: var(--aim-ink);
+  font-family: Inter, var(--mantine-font-family), system-ui, sans-serif;
+}
+.aim-content.mantine-Modal-content::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 4px;
+  background: var(--aim-blue);
+  pointer-events: none;
+}
+
+/* ---------- header ---------- */
+.aim-content .aim-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px 15px;
+  border-bottom: 1px solid var(--aim-line);
+}
+.aim-content .aim-badge {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--aim-sel);
+  color: var(--aim-sel-ink);
+}
+.aim-content .aim-titles {
+  flex: 1;
+  min-width: 0;
+}
+.aim-content .aim-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--aim-ink);
+}
+.aim-content .aim-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--aim-muted);
+}
+.aim-content .aim-close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin-inline-end: -10px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--aim-sub);
+  cursor: pointer;
+}
+.aim-content .aim-close:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+.aim-content .aim-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- layout: the body scrolls, the footer stays put ---------- */
+.aim-content .aim-form {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.aim-content .aim-body.mantine-Modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+/* children must never be squashed when the body is short: it scrolls instead */
+.aim-content .aim-body > * {
+  flex-shrink: 0;
+}
+
+/* ---------- invoice summary card ---------- */
+.aim-content .aim-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--aim-line);
+  border-radius: 10px;
+  background: var(--aim-surface);
+}
+.aim-content .aim-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.aim-content .aim-inv {
+  font-size: 15px;
+  font-weight: 600;
+}
+.aim-content .aim-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding-inline: 10px;
+  border-radius: 13px;
+  background: #fff4e0;
+  color: #7a4100;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.aim-content .aim-pill--ok {
+  background: #ebfbee;
+  color: #1e6b30;
+}
+.aim-content .aim-pill--none {
+  background: #fff5f5;
+  color: #a61e1e;
+}
+.aim-content .aim-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--aim-line);
+  overflow: hidden;
+}
+.aim-content .aim-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--aim-blue);
+}
+.aim-content .aim-fill--ok {
+  background: #2f9e44;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .aim-content .aim-fill {
+    transition: width 0.3s ease;
+  }
+}
+.aim-content .aim-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.aim-content .aim-k {
+  font-size: 12px;
+  color: var(--aim-muted);
+}
+.aim-content .aim-v {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.aim-content .aim-v small {
+  font-size: 13.33px;
+}
+.aim-content .aim-v--rem {
+  font-size: 18px;
+  font-weight: 700;
+  color: #7a4100;
+}
+.aim-content .aim-v--rem small {
+  font-size: 15px;
+}
+.aim-content .aim-v--rem.is-zero {
+  color: #1e6b30;
+}
+
+/* ---------- payments ---------- */
+.aim-content .aim-sec {
+  display: flex;
+  flex-direction: column;
+}
+.aim-content .aim-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+}
+.aim-content .aim-h {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--aim-sub);
+}
+.aim-content .aim-labels,
+.aim-content .aim-row {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr) 40px;
+  column-gap: 8px;
+}
+.aim-content .aim-labels {
+  margin: 6px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--aim-sub);
+}
+.aim-content .aim-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.aim-content .aim-row {
+  row-gap: 8px;
+  align-items: start;
+}
+.aim-content .aim-txn {
+  grid-column: 1 / -1;
+}
+.aim-content .aim-empty {
+  margin-top: 6px;
+  padding: 16px;
+  border: 1px dashed #adb5bd;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--aim-muted);
+}
+
+.aim-content .aim-seg {
+  display: flex;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--aim-field);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.aim-content .aim-seg button {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--aim-ink);
+  cursor: pointer;
+}
+.aim-content .aim-seg button[aria-pressed="true"] {
+  background: var(--aim-sel);
+  color: var(--aim-sel-ink);
+}
+.aim-content .aim-seg button:focus-visible {
+  outline: 2px solid var(--aim-blue);
+  outline-offset: -2px;
+}
+
+.aim-content .aim-chip {
+  align-self: flex-start;
+  height: 28px;
+  margin-top: 8px;
+  padding: 0 11px;
+  border: 1px solid #a5d8ff;
+  border-radius: 14px;
+  background: #e7f5ff;
+  color: var(--aim-sel-ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.aim-content .aim-chip:hover:not(:disabled) {
+  background: var(--aim-sel);
+}
+
+.aim-content .aim-ib {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--aim-danger);
+  cursor: pointer;
+}
+.aim-content .aim-ib:hover:not(:disabled) {
+  background: #fff5f5;
+}
+
+/* ---------- totals box ---------- */
+.aim-content .aim-sum {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--aim-line);
+  border-radius: 10px;
+  background: var(--aim-surface);
+}
+.aim-content .aim-sum-v {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.aim-content .aim-due {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  margin-top: 4px;
+  padding-inline: 10px;
+  border-radius: 13px;
+  background: #fff4e0;
+  color: #7a4100;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.aim-content .aim-due--ok {
+  background: #ebfbee;
+  color: #1e6b30;
+}
+.aim-content .aim-due--over {
+  background: #fff5f5;
+  color: #a61e1e;
+}
+
+/* ---------- notes ---------- */
+.aim-content .aim-lb {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--aim-sub);
+}
+.aim-content .aim-opt {
+  font-weight: 400;
+  color: var(--aim-muted);
+}
+
+/* ---------- notice (fully paid / closed invoice) ---------- */
+.aim-content .aim-note {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #b2f2bb;
+  border-radius: 10px;
+  background: #ebfbee;
+  color: #1e6b30;
+}
+.aim-content .aim-note--stop {
+  border-color: #ffc9c9;
+  background: #fff5f5;
+  color: #a61e1e;
+}
+.aim-content .aim-note svg {
+  flex: none;
+  margin-top: 1px;
+}
+.aim-content .aim-note-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.aim-content .aim-note-text {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ---------- inputs (Mantine) ---------- */
+.aim-content .mantine-Input-input {
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--aim-field);
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--aim-ink);
+}
+.aim-content .mantine-Input-input::placeholder {
+  color: var(--aim-muted);
+  opacity: 1;
+}
+.aim-content .mantine-Input-input:focus {
+  border-color: var(--aim-blue);
+  box-shadow: 0 0 0 2px rgba(25, 113, 194, 0.22);
+}
+.aim-content .aim-amt .mantine-Input-input {
+  font-variant-numeric: tabular-nums;
+}
+.aim-content .mantine-Input-section {
+  color: var(--aim-muted);
+  font-size: 13px;
+}
+.aim-content .mantine-Textarea-input.mantine-Input-input {
+  height: 72px;
+  padding-block: 10px;
+  resize: none;
+}
+
+/* ---------- footer ---------- */
+.aim-content .aim-foot {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--aim-line);
+  background: var(--aim-surface);
+}
+.aim-content .aim-btn {
+  height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--aim-field);
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--aim-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.aim-content .aim-btn:hover:not(:disabled) {
+  background: #f1f3f5;
+  border-color: var(--aim-field);
+}
+.aim-content .aim-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.aim-content .aim-pri {
+  background: var(--aim-blue);
+  border-color: var(--aim-blue);
+  color: #fff;
+}
+.aim-content .aim-pri:hover:not(:disabled) {
+  background: var(--aim-blue-hover);
+  border-color: var(--aim-blue-hover);
+}
+.aim-content .aim-txt {
+  height: 32px;
+  padding: 0 8px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--aim-blue-hover);
+}
+.aim-content button:focus-visible {
+  outline: 2px solid var(--aim-blue);
+  outline-offset: 2px;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 480px) {
+  .aim-content .aim-head {
+    padding-inline: 16px;
+  }
+  .aim-content .aim-body.mantine-Modal-body {
+    padding: 16px;
+  }
+  .aim-content .aim-foot {
+    padding: 12px 16px;
+  }
+  .aim-content .aim-labels {
+    display: none;
+  }
+  .aim-content .aim-row {
+    grid-template-columns: minmax(0, 1fr) 40px;
+  }
+  .aim-content .aim-row .aim-seg {
+    grid-column: 1 / -1;
+  }
+  .aim-content .aim-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
