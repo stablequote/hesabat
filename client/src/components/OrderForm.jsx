@@ -41,7 +41,7 @@ const initialForm = () => ({
   products: [emptyLine()],
   paymentType: "later",
   payments: [],
-  orderDate: null,
+  orderDate: new Date(),
   deliveryDate: null,
   notes: "",
 });
