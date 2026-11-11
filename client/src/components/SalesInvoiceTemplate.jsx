@@ -81,7 +81,7 @@ const SalesInvoiceTemplate = forwardRef(({ order, handlePrint, title, type }, re
                 <strong>{t("Paid-Amount")}:</strong> {formatCurrency(order?.paidAmount)} SDG
               </Text>
               <Text size="sm">
-                <strong>{t("Remaining-Amount")}:</strong> {formatCurrency(order?.remainingAmount.toLocaleString())} SDG
+                <strong>{t("Remaining-Amount")}:</strong> {formatCurrency(order?.remainingAmount)} SDG
               </Text>
             </Stack>
           </Grid.Col>
