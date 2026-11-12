@@ -105,24 +105,24 @@ const InvoiceTemplate = forwardRef(({ order, handlePrint, title, type }, ref) =>
           <tbody>
             {order.products?.map((item, idx) => (
               <tr key={idx} style={{ textAlign: "center" }}>
-                <td>{item.product?.name || item.product}</td>
-                <td>{item.quantity}</td>
-                <td>{item.unit}</td>
-                <td>{formatCurrency(item.unitPurchasePrice)}</td>
-                <td>{formatCurrency(item.unitTotalPrice)}</td>
+                <td>{item?.productName || item?.product}</td>
+                <td>{item?.quantity}</td>
+                <td>{item?.unit.name || item?.unitName}</td>
+                <td>{formatCurrency(item?.unitPurchasePrice)}</td>
+                <td>{formatCurrency(item?.unitTotalPrice)}</td>
               </tr>
             ))}
           </tbody>
         </Table>
 
         {/* 🔷 TOTAL */}
-        <Group justify="flex-end" mt="md">
+        {/* <Group justify="flex-end" mt="md">
           <Box>
             <Text size="lg" fw={700}>
               {t("Total")}: {formatCurrency(order.totalOrderPrice)} SDG
             </Text>
           </Box>
-        </Group>
+        </Group> */}
 
         <Divider my="lg" />
 

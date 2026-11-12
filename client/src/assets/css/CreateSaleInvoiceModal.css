@@ -1,0 +1,532 @@
+/* CreateSaleInvoiceModal.css
+   Everything is scoped under .csi-content (the Mantine Modal's content element),
+   so nothing leaks into the rest of the app. Selectors use two classes on purpose,
+   to win over Mantine's single-class rules regardless of stylesheet order.
+   Logical properties (inline-start/end) are used throughout, so RTL works. */
+
+.csi-content.mantine-Modal-content {
+  --csi-ink: #212529;
+  --csi-sub: #495057;
+  --csi-muted: #5c636a;
+  --csi-line: #e9ecef;
+  --csi-line-2: #dee2e6;
+  --csi-field: #ced4da;
+  --csi-surface: #f8f9fa;
+  --csi-blue: #1971c2;
+  --csi-blue-hover: #1864ab;
+  --csi-blue-ink: #1864ab;
+  --csi-sel: #d0ebff;
+  --csi-sel-ink: #0b4a7d;
+  --csi-chip-bg: #e7f5ff;
+  --csi-chip-line: #a5d8ff;
+  --csi-danger: #c92a2a;
+  --csi-due-bg: #fff4e0;
+  --csi-due-ink: #7a4100;
+  --csi-ok-bg: #ebfbee;
+  --csi-ok-ink: #1e6b2f;
+  --csi-over-bg: #fff5f5;
+  --csi-over-ink: #a61e1e;
+
+  height: min(660px, calc(100vh - 48px));
+  height: min(660px, calc(100dvh - 48px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.3);
+  color: var(--csi-ink);
+  font-family: Inter, var(--mantine-font-family), system-ui, sans-serif;
+}
+
+/* ---------- header ---------- */
+.csi-content .mantine-Modal-header {
+  height: 64px;
+  min-height: 64px;
+  flex: none;
+  padding-block: 0;
+  padding-inline: 24px 10px;
+  border-bottom: 1px solid var(--csi-line);
+}
+.csi-content .mantine-Modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--csi-ink);
+}
+.csi-content .mantine-Modal-close {
+  --cb-size: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--csi-sub);
+}
+
+/* ---------- layout ---------- */
+.csi-content .mantine-Modal-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 0;
+}
+.csi-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  min-height: 0;
+  min-width: 0;
+}
+.csi-left {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  min-height: 0;
+  min-width: 0;
+}
+.csi-right {
+  background: var(--csi-surface);
+  border-inline-start: 1px solid var(--csi-line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.csi-right-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.csi-footer {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px 24px;
+}
+
+/* ---------- labels, inputs ---------- */
+.csi-lb,
+.csi-content .mantine-InputWrapper-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--csi-sub);
+}
+.csi-content .mantine-Input-input {
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--csi-field);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--csi-ink);
+  padding-inline-start: 12px;
+}
+.csi-content .mantine-Input-input::placeholder {
+  color: var(--csi-muted);
+  opacity: 1;
+}
+.csi-content .mantine-Input-input:focus,
+.csi-content .mantine-Input-input:focus-within {
+  border-color: var(--csi-blue);
+  box-shadow: 0 0 0 2px rgba(25, 113, 194, 0.22);
+}
+.csi-content .mantine-Input-input:disabled {
+  background: var(--csi-surface);
+  color: var(--csi-muted);
+}
+.csi-content .mantine-Textarea-input.mantine-Input-input {
+  height: 84px;
+  padding-block: 10px;
+  resize: none;
+}
+.csi-num .mantine-Input-input {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.csi-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- buttons ---------- */
+.csi-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--csi-field);
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--csi-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.csi-btn:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+.csi-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.csi-pri {
+  background: var(--csi-blue);
+  border-color: var(--csi-blue);
+  color: #fff;
+}
+.csi-pri:hover:not(:disabled) {
+  background: var(--csi-blue-hover);
+}
+.csi-txt {
+  border: 0;
+  background: transparent;
+  color: var(--csi-blue-ink);
+  padding: 0 8px;
+  height: 32px;
+}
+.csi-add {
+  width: 100%;
+  height: 44px;
+  margin-top: 12px;
+  border-style: dashed;
+  color: var(--csi-blue-ink);
+}
+.csi-ib {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--csi-danger);
+  cursor: pointer;
+}
+.csi-ib:hover {
+  background: #fff5f5;
+}
+.csi-content button:focus-visible {
+  outline: 2px solid var(--csi-blue);
+  outline-offset: 2px;
+}
+
+/* ---------- product rows ---------- */
+.csi-th,
+.csi-it {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 108px 100px 96px 40px;
+  gap: 8px;
+  align-items: start;
+}
+.csi-th {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--csi-line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--csi-sub);
+}
+.csi-th .csi-end {
+  text-align: end;
+}
+.csi-it {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--csi-line);
+}
+.csi-sm {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--csi-muted);
+}
+.csi-sm.csi-bad {
+  color: var(--csi-danger);
+}
+.csi-c-total {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* quantity stepper */
+.csi-q {
+  height: 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+  min-width: 0;
+  border: 1px solid var(--csi-field);
+  border-radius: 8px;
+  background: #fff;
+}
+.csi-q[data-invalid="true"] {
+  border-color: var(--csi-danger);
+}
+.csi-q > button {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  border-radius: 6px;
+  background: #f1f3f5;
+  color: var(--csi-sub);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.csi-q > button:hover:not(:disabled) {
+  background: var(--csi-line-2);
+}
+.csi-q > button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.csi-q .csi-qroot {
+  flex: 1;
+  min-width: 0;
+}
+.csi-content .csi-q .mantine-Input-input {
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- summary ---------- */
+.csi-h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--csi-ink);
+}
+.csi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+  color: var(--csi-sub);
+  font-variant-numeric: tabular-nums;
+}
+.csi-total {
+  padding-top: 4px;
+  border-top: 1px solid var(--csi-line-2);
+}
+.csi-total b {
+  font-weight: 600;
+  color: var(--csi-ink);
+}
+.csi-total .csi-big {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--csi-ink);
+}
+.csi-disc {
+  display: flex;
+  gap: 8px;
+}
+
+.csi-seg {
+  display: flex;
+  border: 1px solid var(--csi-field);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.csi-seg button {
+  flex: 1;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--csi-ink);
+  cursor: pointer;
+}
+.csi-seg button[aria-pressed="true"] {
+  background: var(--csi-sel);
+  color: var(--csi-sel-ink);
+}
+.csi-seg button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ---------- payments ---------- */
+.csi-pay {
+  min-height: 148px;
+  box-sizing: border-box;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--csi-line-2);
+  background: #fff;
+}
+.csi-pay.csi-empty {
+  border: 1px dashed #adb5bd;
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.csi-pay-row {
+  display: flex;
+  gap: 8px;
+}
+.csi-chip {
+  align-self: flex-start;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px solid var(--csi-chip-line);
+  background: var(--csi-chip-bg);
+  color: var(--csi-sel-ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.csi-chip:hover {
+  background: var(--csi-sel);
+}
+.csi-bal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--csi-line-2);
+  background: #fff;
+}
+.csi-due {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--csi-due-bg);
+  color: var(--csi-due-ink);
+  font-size: 18px;
+  font-weight: 700;
+}
+.csi-due.csi-ok {
+  background: var(--csi-ok-bg);
+  color: var(--csi-ok-ink);
+}
+.csi-due.csi-over {
+  background: var(--csi-over-bg);
+  color: var(--csi-over-ink);
+}
+
+/* ---------- narrow screens: one column, rows reflow ---------- */
+@media (max-width: 860px) {
+  .csi-content.mantine-Modal-content {
+    height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
+  }
+  .csi-grid {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+    align-content: start;
+  }
+  .csi-left {
+    overflow: visible;
+    padding: 16px;
+  }
+  .csi-right {
+    border-inline-start: 0;
+    border-top: 1px solid var(--csi-line);
+  }
+  .csi-right-scroll {
+    overflow: visible;
+    padding: 16px 16px 12px;
+  }
+  .csi-footer {
+    padding: 12px 16px 16px;
+  }
+  .csi-th {
+    display: none;
+  }
+  .csi-it {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "prod prod prod"
+      "unit qty price"
+      "total total del";
+    row-gap: 8px;
+  }
+  .csi-c-prod { grid-area: prod; }
+  .csi-c-unit { grid-area: unit; }
+  .csi-c-qty { grid-area: qty; }
+  .csi-c-price { grid-area: price; }
+  .csi-c-total { grid-area: total; justify-content: flex-start; }
+  .csi-c-del { grid-area: del; justify-self: end; }
+}
+
+/* ===== layout fixes ===== */
+
+.csi-right-scroll > *,
+.csi-left > * {
+  flex-shrink: 0;
+}
+
+/* Desktop: the modal grows with its content (min 660px, capped to the viewport). */
+.csi-content.mantine-Modal-content {
+  height: auto;
+  min-height: min(660px, calc(100vh - 2 * var(--modal-y-offset, 5vh)));
+  min-height: min(660px, calc(100dvh - 2 * var(--modal-y-offset, 5dvh)));
+  max-height: calc(100vh - 2 * var(--modal-y-offset, 5vh));
+  max-height: calc(100dvh - 2 * var(--modal-y-offset, 5dvh));
+}
+.csi-grid {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* Mobile: stack the columns in normal flow and scroll the whole body. */
+@media (max-width: 860px) {
+  .csi-content.mantine-Modal-content {
+    height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .csi-grid {
+    display: block;
+    grid-template-rows: none;
+    overflow-y: auto;
+  }
+  .csi-right-scroll {
+    flex: none;
+    overflow: visible;
+  }
+  .csi-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--csi-surface);
+    border-top: 1px solid var(--csi-line);
+  }
+  .csi-footer .csi-btn {
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+}

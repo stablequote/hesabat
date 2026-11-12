@@ -4,20 +4,21 @@ exports.addVendor = async (req, res) => {
   try {
     const { name, vendorID, contactDetails } = req.body;
 
-    if(!name || contactDetails) {
-      res.status(404).json({ message: "vendor details must be submitted" })
+    if (!name || !contactDetails) {
+      return res.status(400).json({ message: 'Vendor details must be submitted.' });
     }
 
     const newVendor = new Vendor({
-      name, 
-      vendorID, 
-      contactDetails
+      name,
+      vendorID,
+      contactDetails,
     });
 
     await newVendor.save();
-    res.status(201).json({ message: 'Vendor added successfully.', vendor: newVendor });
+    return res.status(201).json({ message: 'Vendor added successfully.', vendor: newVendor });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add vendor.' });
+    console.error('addVendor failed:', error);
+    return res.status(500).json({ error: 'Failed to add vendor.' });
   }
 };
 
@@ -114,5 +115,20 @@ exports.deleteSingleVendor = async (req, res) => {
     res.status(200).json({ message: "vendor successfully deleted" })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+exports.updateVendor = async (req, res) => {
+  try {
+    console.log('params:', req.params, 'body:', req.body);
+    const { id } = req.params;
+    const updates = req.body;
+
+    const updatedVendor = await Vendor.findByIdAndUpdate(id, updates, { new: true });
+    if (!updatedVendor) return res.status(404).json({ message: 'Vendor not found.' });
+
+    res.status(200).json({ message: 'Vendor updated successfully.', Vendor: updatedVendor });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update Vendor.' });
   }
 }

@@ -1,22 +1,22 @@
-import React from "react";
-import {
-  Box,
-  Text,
-  Group,
-  ActionIcon,
-  Burger,
-  Menu,
-  Select,
-} from "@mantine/core";
+import { useEffect, useState } from "react";
+import { ActionIcon, Box, Burger, Menu, Select } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
-  IconBell,
-  IconUser,
+  IconWorld,
+  IconClock,
   IconDotsVertical,
   IconLanguage,
+  IconPower,
 } from "@tabler/icons-react";
 import moment from "moment";
 import SyncButton from "./SyncButton";
+import { useAuth } from "../context/AuthContext";
+import "../assets/css/DashboardHeader.css";
+
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "ar", label: "Arabic" },
+];
 
 const DashboardHeader = ({
   changeLanguage,
@@ -26,144 +26,101 @@ const DashboardHeader = ({
   onNavToggle,
 }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { logout } = useAuth();
 
+  // keeps the clock current (it used to freeze at the last render)
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* ── Mobile: burger + logo, critical items, the rest in an overflow menu ── */
+  if (isMobile) {
+    return (
+      <div className="hs-header hs-header--mobile">
+        <div className="hs-header__brand">
+          <Burger opened={navOpened} onClick={onNavToggle} hiddenFrom="sm" size="sm" aria-label="Menu" />
+          <span className="hs-logo">حسابات</span>
+        </div>
+
+        <div className="hs-header__tools" style={{ gap: 6 }}>
+          {shiftRemainingTime ? (
+            <span className="hs-timer">
+              <bdi dir="ltr">{shiftRemainingTime}</bdi>
+            </span>
+          ) : null}
+
+          <SyncButton />
+
+          <Menu shadow="md" width={220} position="bottom-end">
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray" aria-label="More">
+                <IconDotsVertical size={20} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Label>{moment(now).format("DD MMM YYYY, h:mm A")}</Menu.Label>
+
+              <Box px="sm" py={6}>
+                <Select
+                  data={LANGUAGES}
+                  placeholder="Language"
+                  value={value}
+                  onChange={changeLanguage}
+                  size="xs"
+                  allowDeselect={false}
+                  leftSection={<IconLanguage size={14} />}
+                />
+              </Box>
+
+              <Menu.Divider />
+
+              {/* was labelled "Notifications" and only showed an alert; now it signs out */}
+              <Menu.Item
+                color="red"
+                leftSection={<IconPower size={16} />}
+                onClick={logout}
+              >
+                Sign out
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Desktop ── */
   return (
-    <Box
-      h={60}
-      px={isMobile ? "sm" : "md"}
-      style={{
-        backgroundColor: "#71a0e2",
-        color: "white",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Group justify="space-between" w="100%" wrap="nowrap" gap="xs">
-
-        {/* Left: Burger (mobile only) + Logo */}
-        <Group gap="xs" wrap="nowrap">
-          <Burger
-            opened={navOpened}
-            onClick={onNavToggle}
-            hiddenFrom="sm"
-            color="white"
-            size="sm"
-          />
-          <Text
-            c="orange"
-            fz={isMobile ? 22 : 32}
-            fw="bold"
-            ff="monospace"
-            style={{ lineHeight: 1, whiteSpace: "nowrap" }}
-          >
-            حسابات
-          </Text>
-        </Group>
-
-        {/* Right side */}
-        {isMobile ? (
-          /* ── Mobile: keep only critical items, rest in overflow menu ── */
-          <Group gap={6} wrap="nowrap">
-            {/* Shift timer — compact */}
-            {shiftRemainingTime ? (
-              <Text size="xs" c="white" style={{ whiteSpace: "nowrap" }}>
-                {shiftRemainingTime}
-              </Text>
-            ) : null}
-
-            <SyncButton />
-
-            {/* Overflow menu for secondary actions */}
-            <Menu shadow="md" width={220} position="bottom-end">
-              <Menu.Target>
-                <ActionIcon variant="subtle" color="white">
-                  <IconDotsVertical size={20} />
-                </ActionIcon>
-              </Menu.Target>
-              <Menu.Dropdown>
-                {/* Date/time */}
-                <Menu.Label>
-                  {moment(Date.now()).format("DD MMM YYYY, h:mm A")}
-                </Menu.Label>
-
-                {/* Language selector inside the menu */}
-                <Box px="sm" py={6}>
-                  <Select
-                    data={[
-                      { value: "en", label: "English" },
-                      { value: "ar", label: "Arabic" },
-                    ]}
-                    placeholder="Language"
-                    value={value}
-                    onChange={changeLanguage}
-                    size="xs"
-                    leftSection={<IconLanguage size={14} />}
-                  />
-                </Box>
-
-                <Menu.Divider />
-
-                <Menu.Item
-                  leftSection={<IconBell size={16} />}
-                  onClick={() =>
-                    alert("Notifications feature is coming soon...")
-                  }
-                >
-                  Notifications
-                </Menu.Item>
-
-                <Menu.Item
-                  leftSection={<IconUser size={16} />}
-                  onClick={() =>
-                    alert("Profile management is coming soon...")
-                  }
-                >
-                  Profile
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          </Group>
-        ) : (
-          /* ── Desktop: full inline controls ── */
-          <Group gap="sm" wrap="nowrap">
-            <SyncButton />
-            <Select
-              data={[
-                { value: "en", label: "English" },
-                { value: "ar", label: "Arabic" },
-              ]}
-              placeholder="Language"
-              value={value}
-              onChange={changeLanguage}
-              size="sm"
-              style={{ width: 120 }}
-            />
-            <Text size="sm" style={{ whiteSpace: "nowrap" }}>
-              {moment(Date.now()).format("DD-MMMM-YYYY h:mm A")}
-            </Text>
-            <ActionIcon
-              variant="subtle"
-              color="white"
-              onClick={() => alert("Notifications feature is coming soon...")}
-            >
-              <IconBell size={20} />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              color="white"
-              onClick={() => alert("Profile management is coming soon...")}
-            >
-              <IconUser size={20} />
-            </ActionIcon>
-            {shiftRemainingTime && (
-              <Text size="sm" c="white" style={{ whiteSpace: "nowrap" }}>
-                {shiftRemainingTime}
-              </Text>
-            )}
-          </Group>
+    <div className="hs-header">
+      <div className="hs-header__meta">
+        <IconWorld size={18} stroke={1.75} aria-hidden="true" />
+        <time dir="ltr" dateTime={new Date(now).toISOString()}>
+          {moment(now).format("ddd D MMM · h:mm A")}
+        </time>
+        {shiftRemainingTime && (
+          <span className="hs-chip">
+            <IconClock size={14} stroke={2} aria-hidden="true" />
+            <bdi dir="ltr">{shiftRemainingTime}</bdi>
+          </span>
         )}
-      </Group>
-    </Box>
+      </div>
+
+      <div className="hs-header__tools">
+        <SyncButton />
+        <Select
+          className="hs-lang"
+          aria-label="Language"
+          data={LANGUAGES}
+          placeholder="Language"
+          value={value}
+          onChange={changeLanguage}
+          allowDeselect={false}
+          leftSection={<IconWorld size={18} stroke={1.75} />}
+        />
+      </div>
+    </div>
   );
 };
 

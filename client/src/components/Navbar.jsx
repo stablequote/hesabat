@@ -1,92 +1,111 @@
-import { Box, Button, Divider, Stack } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { NavLink } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../context/AuthContext';
- 
+import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  IconLayoutGrid,
+  IconUsers,
+  IconBuildingStore,
+  IconFileExport,
+  IconShoppingBag,
+  IconBook2,
+  IconWallet,
+  IconCash,
+  IconBox,
+  IconPower,
+} from "@tabler/icons-react";
+import { useAuth } from "../context/AuthContext";
+import "../assets/css/Navbar.css";
+
+
+
+const readRole = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user"))?.role;
+  } catch {
+    return undefined;
+  }
+};
+
 const AppNavbar = ({ onNavigate }) => {
- 
-  const activeStyle = {
-    backgroundColor: '#009099',
-    fontWeight: 'bold',
-    borderRadius: '4px',
-  };
- 
-  const isMobile = useMediaQuery('(max-width: 375px)');
   const { logout } = useAuth();
   const { t } = useTranslation();
- 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const role = user?.role;
- 
-  const linkProps = (isActive) => ({
-    style: isActive ? activeStyle : undefined,
-    onClick: onNavigate,
-  });
- 
+  const role = readRole();
+
+  // Same routes, translation keys and role rules as before, now in one list.
+  // `label` is [translation key, English fallback]; groups without a label have no heading.
+  const NAV = [
+    {
+      items: [
+        { to: "/overview", key: "OVERVIEW", icon: IconLayoutGrid, ownerOnly: true },
+        { to: "/clients", key: "CLIENTS", icon: IconUsers },
+        { to: "/vendors", key: "VENDORS", icon: IconBuildingStore },
+      ],
+    },
+    {
+      label: ["NAV-INVOICES", t("Invoices")],
+      items: [
+        { to: "/sale-invoices", key: "SALE-INVOICES", icon: IconFileExport },
+        { to: "/purchase-invoices", key: "PURCHASE-INVOICES", icon: IconShoppingBag, ownerOnly: true },
+      ],
+    },
+    {
+      label: ["NAV-FINANCE", t("Finance")],
+      items: [
+        { to: "/ledger", key: "LEDGER", icon: IconBook2, ownerOnly: true },
+        { to: "/expenses", key: "EXPENSES", icon: IconWallet },
+        { to: "/cashout", key: "CASHOUT", icon: IconCash },
+      ],
+    },
+    {
+      label: ["NAV-INVENTORY", t("Inventory")],
+      items: [{ to: "/products", key: "PRODUCTS", icon: IconBox }],
+    },
+  ];
+
+  const groups = NAV.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => !i.ownerOnly || role === "owner"),
+  })).filter((g) => g.items.length > 0);
+
   return (
-    <Stack width={!isMobile ? { base: 250 } : 100} p="xs" style={{ background: '#0e356d' }}>
- 
-      {role === "owner" && (
-        <NavLink to="/overview" {...({ style: ({ isActive }) => isActive ? activeStyle : undefined, onClick: onNavigate })}>
-          {t("OVERVIEW")}
-        </NavLink>
-      )}
- 
-      <NavLink to="/clients" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("CLIENTS")}
-      </NavLink>
- 
-      <NavLink to="/vendors" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("VENDORS")}
-      </NavLink>
- 
-      <Divider size={1} my={10} />
- 
-      <NavLink to="/sale-invoices" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("SALE-INVOICES")}
-      </NavLink>
- 
-      {role === "owner" && (
-        <NavLink to="/purchase-invoices" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-          {t("PURCHASE-INVOICES")}
-        </NavLink>
-      )}
- 
-      <Divider size={1} my={10} />
- 
-      {role === "owner" && (
-        <NavLink to="/ledger" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-          {t("LEDGER")}
-        </NavLink>
-      )}
- 
-      <NavLink to="/expenses" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("EXPENSES")}
-      </NavLink>
- 
-      <NavLink to="/cashout" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("CASHOUT")}
-      </NavLink>
- 
-      <Divider size={1} my={10} />
- 
-      <NavLink to="/products" style={({ isActive }) => isActive ? activeStyle : undefined} onClick={onNavigate}>
-        {t("PRODUCTS")}
-      </NavLink>
- 
-      <Divider size={1} my={10} />
- 
-      <Button
-        color="red"
-        mt="lg"
-        onClick={logout}
-        sx={{ position: "absolute", bottom: 22, left: 10, width: "90%" }}
+    <nav className="hs-nav" aria-label="Main">
+      <div className="hs-nav__logo">حسابات</div>
+
+      <div className="hs-nav__list">
+        {groups.map((group, gi) => (
+          <div key={gi}>
+            {group.label && (
+              <div className="hs-nav__label">
+                {t(group.label[0], { defaultValue: group.label[1] })}
+              </div>
+            )}
+            {group.items.map(({ to, key, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={onNavigate}
+                className={({ isActive }) => `hs-nav__item${isActive ? " is-active" : ""}`}
+              >
+                <Icon className="hs-nav__icon" size={19} stroke={1.75} aria-hidden="true" />
+                <span>{t(key)}</span>
+              </NavLink>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className="hs-nav__item hs-nav__signout"
+        onClick={() => {
+          onNavigate?.();
+          logout();
+        }}
       >
-        {t("LOGOUT")}
-      </Button>
-    </Stack>
+        <IconPower className="hs-nav__icon" size={19} stroke={1.75} aria-hidden="true" />
+        <span>{t("LOGOUT", { defaultValue: "Sign out" })}</span>
+      </button>
+    </nav>
   );
 };
- 
+
 export default AppNavbar;

@@ -1,0 +1,253 @@
+/* AddVendorModal.css
+   Rebuilt from the "New vendor" design image. No external fonts or resources:
+   Inter is used only if it is already installed, otherwise the app's Mantine font.
+
+   SIZE KNOB: every dimension below is `calc(N * var(--u))`. --u is 1px, which
+   reproduces the design at its natural size (480px wide). To scale the whole modal
+   up or down, change one number, e.g. --u: 1.15px for +15%.
+
+   Logical properties are used throughout, so setting dir="rtl" mirrors the layout. */
+
+.vm-content.mantine-Modal-content {
+  --u: 1px;
+
+  --vm-ink: #212529;
+  --vm-sub: #495057;
+  --vm-muted: #6c757d;
+  --vm-line: #e9ecef;
+  --vm-field: #ced4da;
+  --vm-foot: #f8f9fa;
+  --vm-accent: #d9480f;      /* top bar, focus */
+  --vm-accent-btn: #cf430c;  /* button: a touch darker so white text passes AA contrast */
+  --vm-accent-hover: #b93a09;
+  --vm-badge-bg: #ffe8cc;
+  --vm-badge-ink: #a8380c;
+  --vm-danger: #c92a2a;
+
+  position: relative;
+  flex: 0 1 calc(480 * var(--u));
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: calc(14 * var(--u));
+  box-shadow: 0 calc(24 * var(--u)) calc(60 * var(--u)) rgba(16, 24, 40, 0.3);
+  color: var(--vm-ink);
+  font-family: Inter, var(--mantine-font-family), system-ui, sans-serif;
+  font-size: calc(14 * var(--u));
+}
+
+/* accent bar across the top */
+.vm-content.mantine-Modal-content::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: calc(4 * var(--u));
+  background: var(--vm-accent);
+}
+
+/* ---------- header ---------- */
+.vm-content .vm-head {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  padding: calc(20 * var(--u)) calc(24 * var(--u)) calc(16 * var(--u));
+  border-bottom: 1px solid var(--vm-line);
+}
+.vm-content .vm-badge {
+  flex: none;
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  display: grid;
+  place-items: center;
+  border-radius: calc(10 * var(--u));
+  background: var(--vm-badge-bg);
+  color: var(--vm-badge-ink);
+}
+.vm-content .vm-titles {
+  flex: 1;
+  min-width: 0;
+}
+.vm-content .vm-title {
+  margin: 0;
+  font-size: calc(18 * var(--u));
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--vm-ink);
+}
+.vm-content .vm-sub {
+  margin: 0;
+  font-size: calc(13 * var(--u));
+  line-height: 1.3;
+  color: var(--vm-muted);
+}
+.vm-content .vm-close {
+  flex: none;
+  width: calc(36 * var(--u));
+  height: calc(36 * var(--u));
+  margin-inline-end: calc(-10 * var(--u));
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: calc(8 * var(--u));
+  background: transparent;
+  color: var(--vm-sub);
+  cursor: pointer;
+}
+.vm-content .vm-close:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+.vm-content .vm-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- form ---------- */
+.vm-content .vm-body.mantine-Modal-body {
+  padding: 0;
+}
+.vm-content .vm-fields {
+  padding: calc(24 * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(20 * var(--u));
+}
+.vm-content .vm-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(12 * var(--u));
+}
+
+.vm-content .vm-label {
+  display: block;
+  margin-bottom: calc(6 * var(--u));
+  font-size: calc(13 * var(--u));
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--vm-sub);
+}
+.vm-content .vm-opt {
+  font-weight: 400;
+  color: var(--vm-muted);
+}
+
+.vm-content .vm-control {
+  position: relative;
+}
+.vm-content .vm-ico {
+  position: absolute;
+  inset-inline-start: calc(13 * var(--u));
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vm-sub);
+  pointer-events: none;
+}
+.vm-content .vm-input {
+  display: block;
+  width: 100%;
+  height: calc(40 * var(--u));
+  box-sizing: border-box;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: calc(40 * var(--u)) calc(12 * var(--u));
+  border: 1px solid var(--vm-field);
+  border-radius: calc(10 * var(--u));
+  background: #fff;
+  font-family: inherit;
+  font-size: calc(14 * var(--u));
+  color: var(--vm-ink);
+  outline: none;
+  text-align: start;
+}
+.vm-content .vm-input::placeholder {
+  color: var(--vm-muted);
+  opacity: 1;
+}
+.vm-content .vm-input:focus {
+  border-color: var(--vm-accent);
+  box-shadow: 0 0 0 calc(3 * var(--u)) rgba(217, 72, 15, 0.18);
+}
+.vm-content .vm-control[data-invalid="true"] .vm-input {
+  border-color: var(--vm-danger);
+}
+.vm-content .vm-error {
+  margin-top: calc(4 * var(--u));
+  font-size: calc(12 * var(--u));
+  line-height: 1.35;
+  color: var(--vm-danger);
+}
+
+/* ---------- footer band ---------- */
+.vm-content .vm-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: calc(8 * var(--u));
+  padding: calc(16 * var(--u)) calc(24 * var(--u));
+  border-top: 1px solid var(--vm-line);
+  background: var(--vm-foot);
+}
+.vm-content .vm-btn {
+  height: calc(44 * var(--u));
+  margin: 0;
+  padding: 0 calc(16 * var(--u));
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  border: 1px solid var(--vm-field);
+  border-radius: calc(10 * var(--u));
+  background: #fff;
+  font-family: inherit;
+  font-size: calc(14 * var(--u));
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--vm-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.vm-content .vm-btn:hover:not(:disabled) {
+  background: #f1f3f5;
+  border-color: var(--vm-field);
+}
+.vm-content .vm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.vm-content .vm-pri {
+  background: var(--vm-accent-btn);
+  border-color: var(--vm-accent-btn);
+  color: #fff;
+  font-weight: 600;
+}
+.vm-content .vm-pri:hover:not(:disabled) {
+  background: var(--vm-accent-hover);
+  border-color: var(--vm-accent-hover);
+}
+.vm-content button:focus-visible {
+  outline: 2px solid var(--vm-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 520px) {
+  .vm-content .vm-head {
+    padding-inline: calc(16 * var(--u));
+  }
+  .vm-content .vm-fields {
+    padding: calc(20 * var(--u)) calc(16 * var(--u));
+  }
+  .vm-content .vm-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vm-content .vm-foot {
+    padding: calc(12 * var(--u)) calc(16 * var(--u));
+  }
+}
+@media (max-width: 380px) {
+  .vm-content .vm-pri {
+    flex: 1;
+  }
+}

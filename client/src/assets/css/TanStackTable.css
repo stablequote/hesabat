@@ -1,0 +1,297 @@
+/* TanStackTable.css: table card, toolbar, rows, pagination, and the shared cell helpers
+   (RowActions, DateTimeCell). Logical properties throughout, so it follows the page direction. */
+
+.tst-card {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--hs-line, #e9ecef);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+  overflow: hidden;
+}
+.tst-card--full {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: auto;
+  height: 100vh;
+  border-radius: 0;
+  overflow: auto;
+}
+.tst-card[data-density="compact"] { --tst-row-h: 44px; }
+.tst-card[data-density="default"] { --tst-row-h: 57px; }
+.tst-card[data-density="spacious"] { --tst-row-h: 70px; }
+
+/* ---------- toolbar ---------- */
+.tst-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+}
+.tst-search {
+  position: relative;
+  flex: 0 1 300px;
+  min-width: 200px;
+}
+.tst-search__ico {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #495057;
+  pointer-events: none;
+}
+.tst-search__input {
+  display: block;
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: 40px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  color: #212529;
+  outline: none;
+  appearance: none;
+}
+.tst-search__input::placeholder {
+  color: #6c757d;
+  opacity: 1;
+}
+.tst-search__input::-webkit-search-cancel-button {
+  display: none;
+}
+.tst-search__input:focus {
+  border-color: #1971c2;
+  box-shadow: 0 0 0 3px rgba(25, 113, 194, 0.18);
+}
+.tst-toolbar__end {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tst-custom {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tst-iconbtns {
+  display: flex;
+  gap: 8px;
+}
+.tst-iconbtn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  color: #343a40;
+  cursor: pointer;
+}
+.tst-iconbtn:hover {
+  background: #f8f9fa;
+}
+.tst-iconbtn[aria-pressed="true"] {
+  background: #e7f5ff;
+  border-color: #a5d8ff;
+  color: #1971c2;
+}
+.tst-iconbtn:focus-visible {
+  outline: 2px solid #1971c2;
+  outline-offset: 2px;
+}
+
+/* ---------- table ---------- */
+.tst-scroll {
+  overflow-x: auto;
+}
+.tst-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #212529;
+}
+.tst-table thead th {
+  height: 42px;
+  padding: 0 16px;
+  background: #f7f8fb;
+  border-top: 1px solid #eef0f3;
+  border-bottom: 1px solid #e9ecef;
+  text-align: start;
+  font-size: 13px;
+  font-weight: 600;
+  color: #343a40;
+  white-space: nowrap;
+}
+.tst-table tbody td {
+  height: var(--tst-row-h, 57px);
+  padding: 0 16px;
+  border-bottom: 1px solid #eef0f3;
+  vertical-align: middle;
+}
+.tst-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tst-table tbody tr:hover {
+  background: #f8f9fb;
+}
+.tst-table tbody tr[data-selected] {
+  background: #f1f6ff;
+}
+.tst-table tbody tr[data-clickable="true"] {
+  cursor: pointer;
+}
+.tst-th--select,
+.tst-td--select {
+  width: 60px;
+  padding-inline: 20px 8px !important;
+}
+.tst-empty {
+  text-align: center !important;
+  color: #6c757d;
+}
+
+.tst-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.tst-sort__ico {
+  color: #adb5bd;
+  opacity: 0;
+}
+.tst-sort:hover .tst-sort__ico,
+.tst-sort:focus-visible .tst-sort__ico {
+  opacity: 1;
+}
+.tst-sort[data-sorted] .tst-sort__ico {
+  color: #1971c2;
+  opacity: 1;
+}
+.tst-sort:focus-visible {
+  outline: 2px solid #1971c2;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* checkboxes (Mantine) */
+.tst-card .mantine-Checkbox-input {
+  border-color: #adb5bd;
+  border-radius: 4px;
+}
+
+/* ---------- footer: count + rows + pagination ---------- */
+.tst-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #eef0f3;
+}
+.tst-count,
+.tst-rowslabel {
+  font-size: 14px;
+  color: #495057;
+}
+.tst-pager {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tst-rows {
+  width: 72px;
+}
+.tst-rows .mantine-Input-input {
+  height: 34px;
+  min-height: 34px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.tst-card .mantine-Pagination-control {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #343a40;
+}
+.tst-card .mantine-Pagination-control[data-active] {
+  background: var(--pagination-active-bg, #1971c2);
+  border-color: transparent;
+  color: #fff;
+}
+.tst-card .mantine-Pagination-control[data-disabled] {
+  opacity: 0.5;
+}
+
+/* mobile card list wrapper */
+.tst-cards {
+  padding: 0 12px 12px;
+}
+
+/* ---------- shared cells ---------- */
+.ra {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ra__btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.ra__btn--edit { color: #1971c2; }
+.ra__btn--edit:hover { background: #e7f5ff; }
+.ra__btn--del { color: #c92a2a; }
+.ra__btn--del:hover { background: #fff5f5; }
+.ra__btn:focus-visible {
+  outline: 2px solid #1971c2;
+  outline-offset: 2px;
+}
+.tc-strong { font-weight: 600; }
+.tc-muted { color: #6c757d; }
+.tc-date {
+  font-size: 14px;
+  line-height: 1.35;
+  color: #212529;
+}
+.tc-time {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .tst-toolbar { padding: 12px; }
+  .tst-search { flex: 1 1 100%; }
+  .tst-foot { padding: 12px; }
+}

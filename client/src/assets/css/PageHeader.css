@@ -1,0 +1,49 @@
+/* PageHeader.css: page title + count on one side, primary action on the other. */
+
+.ph {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.ph__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--hs-ink, #212529);
+}
+.ph__sub {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--hs-muted, #6c757d);
+}
+.ph__btn {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--hs-blue, #1971c2);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+.ph__btn:hover:not(:disabled) {
+  background: var(--hs-blue-hover, #1864ab);
+}
+.ph__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ph__btn:focus-visible {
+  outline: 2px solid var(--hs-blue, #1971c2);
+  outline-offset: 2px;
+}

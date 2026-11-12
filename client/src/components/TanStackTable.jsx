@@ -7,31 +7,14 @@ import {
   getFilteredRowModel,
   flexRender,
 } from "@tanstack/react-table";
-
-import {
-  Table,
-  Checkbox,
-  Group,
-  Button,
-  Pagination,
-  Select,
-  Paper,
-  Tooltip,
-  ActionIcon,
-  Text,
-  Box,
-  Stack,
-  Card,
-  Divider,
-} from "@mantine/core";
-
+import { Checkbox, Pagination, Select, Text, Stack, Card, Group, Divider } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import {
-  IconSortAscending,
-  IconSortDescending,
-} from "@tabler/icons-react";
+import { IconSelector, IconArrowUp, IconArrowDown } from "@tabler/icons-react";
+import TableToolbar from "./TableToolbar";
+import "../assets/css/TanStackTable.css";
 
-import DefaultToolbar from "./DefaultToolbar";
+const EMPTY = [];
+const SORT_ARIA = { asc: "ascending", desc: "descending" };
 
 const TanStackTable = ({
   data,
@@ -40,13 +23,14 @@ const TanStackTable = ({
   actionsColumn,
   customToolbarOptions,
   onSelectionChange,
+  searchPlaceholder = "Search",
 }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [density, setDensity] = useState(isMobile ? "xs" : "xl");
+  const [density, setDensity] = useState(isMobile ? "compact" : "default");
   const [columnVisibility, setColumnVisibility] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState([]);
@@ -60,27 +44,32 @@ const TanStackTable = ({
     id: "select",
     header: ({ table }) => (
       <Checkbox
+        size={17}
+        aria-label="Select all rows"
         checked={table.getIsAllRowsSelected()}
         indeterminate={table.getIsSomeRowsSelected()}
         onChange={table.getToggleAllRowsSelectedHandler()}
       />
     ),
     cell: ({ row }) => (
-      <Box onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()}>
         <Checkbox
+          size={17}
+          aria-label="Select row"
           checked={row.getIsSelected()}
           onChange={(e) => {
             row.getToggleSelectedHandler()(e);
             onSelectionChange?.(e.currentTarget.checked ? row.original : null);
           }}
         />
-      </Box>
+      </div>
     ),
   };
 
   const table = useReactTable({
-    data,
-    columns: [selectionColumn, ...columns, actionsColumn],
+    data: data ?? EMPTY,
+    // `actionsColumn` is optional: pages without one used to crash the table
+    columns: [selectionColumn, ...columns, actionsColumn].filter(Boolean),
     state: {
       rowSelection,
       sorting,
@@ -109,17 +98,13 @@ const TanStackTable = ({
 
   // ---------- MOBILE: card list instead of a table ----------
   const renderMobileCards = () => (
-    <Stack gap="sm">
+    <Stack gap="sm" className="tst-cards">
       {table.getRowModel().rows.map((row) => {
         const dataCells = row
           .getVisibleCells()
           .filter((c) => !["select", "actions"].includes(c.column.id));
-        const selectCell = row
-          .getVisibleCells()
-          .find((c) => c.column.id === "select");
-        const actionCell = row
-          .getVisibleCells()
-          .find((c) => c.column.id === "actions");
+        const selectCell = row.getVisibleCells().find((c) => c.column.id === "select");
+        const actionCell = row.getVisibleCells().find((c) => c.column.id === "actions");
 
         return (
           <Card
@@ -132,16 +117,8 @@ const TanStackTable = ({
             style={{ cursor: onRowClick ? "pointer" : "default" }}
           >
             <Group justify="space-between" mb={4} wrap="nowrap">
-              {selectCell &&
-                flexRender(
-                  selectCell.column.columnDef.cell,
-                  selectCell.getContext()
-                )}
-              {actionCell &&
-                flexRender(
-                  actionCell.column.columnDef.cell,
-                  actionCell.getContext()
-                )}
+              {selectCell && flexRender(selectCell.column.columnDef.cell, selectCell.getContext())}
+              {actionCell && flexRender(actionCell.column.columnDef.cell, actionCell.getContext())}
             </Group>
             <Divider mb={6} />
             <Stack gap={4}>
@@ -153,7 +130,7 @@ const TanStackTable = ({
                     <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                       {label}
                     </Text>
-                    <Text size="sm" ta="right" style={{ wordBreak: "break-word" }}>
+                    <Text size="sm" ta="end" style={{ wordBreak: "break-word" }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </Text>
                   </Group>
@@ -166,87 +143,92 @@ const TanStackTable = ({
     </Stack>
   );
 
-  // ---------- DESKTOP: original table ----------
-  const renderDesktopTable = () => (
-    <Table
-      striped
-      highlightOnHover
-      horizontalSpacing="lg"
-      verticalSpacing={density}
-      styles={{
-        td: { padding: "14px 12px" },
-        th: { padding: "14px 12px" },
-      }}
-    >
-      <thead>
-        {table.getHeaderGroups().map((hg) => (
-          <tr key={hg.id}>
-            {hg.headers.map((header) => {
-              const canSort = header.column.getCanSort();
-              return (
-                <th
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                  style={{
-                    cursor: canSort ? "pointer" : "default",
-                    color: "blue",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    borderBottom: "1px solid gray",
-                    paddingBottom: "0.75rem",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <Group gap={5} wrap="nowrap">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {canSort &&
-                      (header.column.getIsSorted() === "asc" ? (
-                        <IconSortAscending size={14} />
-                      ) : header.column.getIsSorted() === "desc" ? (
-                        <IconSortDescending size={14} />
-                      ) : null)}
-                  </Group>
-                </th>
-              );
-            })}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr
-            key={row.id}
-            onClick={() => onRowClick?.(row.original)}
-            style={{ cursor: onRowClick ? "pointer" : "default" }}
-          >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} style={{ paddingTop: 14, paddingBottom: 14 }}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
+  // ---------- DESKTOP: table ----------
+  const renderDesktopTable = () => {
+    const rows = table.getRowModel().rows;
+    return (
+      <div className="tst-scroll">
+        <table className="tst-table">
+          <thead>
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
+                  const label = flexRender(header.column.columnDef.header, header.getContext());
+                  return (
+                    <th
+                      key={header.id}
+                      scope="col"
+                      className={header.column.id === "select" ? "tst-th--select" : undefined}
+                      aria-sort={canSort ? SORT_ARIA[sorted] || "none" : undefined}
+                    >
+                      {canSort ? (
+                        <button
+                          type="button"
+                          className="tst-sort"
+                          data-sorted={sorted || undefined}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {label}
+                          {sorted === "asc" ? (
+                            <IconArrowUp className="tst-sort__ico" size={14} aria-hidden="true" />
+                          ) : sorted === "desc" ? (
+                            <IconArrowDown className="tst-sort__ico" size={14} aria-hidden="true" />
+                          ) : (
+                            <IconSelector className="tst-sort__ico" size={14} aria-hidden="true" />
+                          )}
+                        </button>
+                      ) : (
+                        label
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
             ))}
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  );
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td className="tst-empty" colSpan={table.getVisibleLeafColumns().length}>
+                  No results
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr
+                  key={row.id}
+                  data-selected={row.getIsSelected() || undefined}
+                  data-clickable={onRowClick ? "true" : undefined}
+                  onClick={() => onRowClick?.(row.original)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className={cell.column.id === "select" ? "tst-td--select" : undefined}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  // ---------- footer numbers ----------
+  const total = table.getFilteredRowModel().rows.length;
+  const { pageIndex, pageSize } = pagination;
+  const from = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const to = Math.min(total, (pageIndex + 1) * pageSize);
 
   return (
-    <Paper
-      shadow="lg"
-      px={isMobile ? 8 : 20}
-      py={10}
-      withBorder
-      style={{
-        position: isFullscreen ? "fixed" : "relative",
-        inset: isFullscreen ? 0 : "auto",
-        width: "100%",
-        height: isFullscreen ? "100vh" : "auto",
-        zIndex: isFullscreen ? 9999 : "auto",
-        overflow: "auto",
-        background: "white",
-      }}
+    <div
+      className={`tst-card${isFullscreen ? " tst-card--full" : ""}`}
+      data-density={density}
     >
-      <DefaultToolbar
+      <TableToolbar
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
         density={density}
@@ -255,43 +237,44 @@ const TanStackTable = ({
         isFullscreen={isFullscreen}
         setIsFullscreen={setIsFullscreen}
         compact={isMobile}
+        searchPlaceholder={searchPlaceholder}
       >
-        <Stack gap={6} w={isMobile ? "100%" : "auto"}>
-          {Object.entries(customToolbarOptions || {}).map(([key, renderFn]) => (
-            <div key={key}>
-              {typeof renderFn === "function" ? renderFn(checkedRows) : renderFn}
-            </div>
-          ))}
-        </Stack>
-      </DefaultToolbar>
+        {Object.entries(customToolbarOptions || {}).map(([key, renderFn]) => (
+          <div key={key}>{typeof renderFn === "function" ? renderFn(checkedRows) : renderFn}</div>
+        ))}
+      </TableToolbar>
 
-      {/* On mobile, only wrap in horizontal scroll if we still render the table (we don't by default) */}
       {isMobile ? renderMobileCards() : renderDesktopTable()}
 
-      <Group justify="space-between" mt="md" wrap="wrap">
-        <Group justify="start" mt="md" gap="xs">
-          <Text size={isMobile ? "xs" : "sm"}>Rows</Text>
+      <div className="tst-foot">
+        <div className="tst-count">
+          {total === 0 ? "No results" : `Showing ${from}–${to} of ${total}`}
+        </div>
+
+        <div className="tst-pager">
+          <span className="tst-rowslabel">Rows</span>
           <Select
-            size={isMobile ? "xs" : "sm"}
-            w={80}
-            value={String(pagination.pageSize)}
+            className="tst-rows"
+            aria-label="Rows per page"
+            value={String(pageSize)}
             onChange={(val) =>
-              setPagination((prev) => ({ ...prev, pageSize: Number(val) }))
+              val && setPagination({ pageIndex: 0, pageSize: Number(val) })
             }
             data={["5", "10", "20", "50", "100"]}
+            allowDeselect={false}
+            comboboxProps={{ zIndex: 10000 }}
           />
-        </Group>
-
-        <Pagination
-          size={isMobile ? "sm" : "md"}
-          total={table.getPageCount()}
-          value={pagination.pageIndex + 1}
-          onChange={(page) =>
-            setPagination((prev) => ({ ...prev, pageIndex: page - 1 }))
-          }
-        />
-      </Group>
-    </Paper>
+          <Pagination
+            size={34}
+            radius={8}
+            color="blue.8"
+            total={table.getPageCount()}
+            value={pageIndex + 1}
+            onChange={(page) => setPagination((prev) => ({ ...prev, pageIndex: page - 1 }))}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

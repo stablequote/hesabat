@@ -1,0 +1,32 @@
+/* DashboardLayout.css
+   Shared tokens for the dashboard shell (header, sidebar, page content).
+   Header, sidebar, page header and table all read these variables.
+   No external fonts: text inherits the app's own font. All spacing uses logical
+   properties, so the shell follows the page direction (RTL or LTR). */
+
+.hs-shell {
+  --hs-nav-bg: #0e2f63;
+  --hs-main-bg: #f4f6fa;
+  --hs-ink: #212529;
+  --hs-sub: #495057;
+  --hs-muted: #6c757d;
+  --hs-line: #e9ecef;
+  --hs-line-strong: #dee2e6;
+  --hs-blue: #1971c2;
+  --hs-blue-hover: #1864ab;
+  --hs-danger: #c92a2a;
+  --hs-orange: #ff922b;      /* logo on the dark sidebar */
+  --hs-orange-ink: #e8590c;  /* logo on a white background */
+}
+
+.hs-shell .hs-main {
+  background: var(--hs-main-bg);
+}
+.hs-shell .hs-header-shell {
+  background: #fff;
+  border-bottom: 1px solid var(--hs-line);
+}
+.hs-shell .hs-nav-shell {
+  background: var(--hs-nav-bg);
+  border: 0;
+}

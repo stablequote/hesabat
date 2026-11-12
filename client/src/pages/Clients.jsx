@@ -6,7 +6,10 @@ import moment from 'moment'
 import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-react';
 // import CustomTable from '../components/CustomTable'
 import AddClientModal from '../components/AddClientModal';
+import EditClientModal from '../components/EditClientModal';
 import TanStackTable from '../components/TanStackTable';
+import PageHeader from '../components/PageHeader';
+import { RowActions, DateTimeCell } from '../components/TableCells';
 
 export const clientsSeed = [
   {
@@ -56,6 +59,17 @@ function Clients() {
     location: '',
     email: "",
   })
+
+  // edit client modal update
+  const [editOpened, setEditOpened] = useState(false);
+  const [editingClientId, setEditingClientId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    location: '',
+    email: '',
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // state imports for MRT
@@ -68,46 +82,58 @@ function Clients() {
 
   const BASE_URL = import.meta.env.VITE_URL;
 
-  const columns = useMemo( () =>
-    [
-      {
-      accessorKey: "fullName",
-      header: "Client Name",
+  // const columns = useMemo( () =>
+  //   [
+  //     {
+  //     accessorKey: "fullName",
+  //     header: "Client Name",
       
-    },
-    {
-      accessorFn: (row) => row.contactDetails?.location || "—",
-      id: "location",
-      header: "Location",
-    },
-    {
-      accessorFn: (row) => row.contactDetails?.phone || "—",
-      id: "phone",
-      header: "Phone",
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Added on",
-      cell: ({ getValue }) => {
-        const value = getValue();
+  //   },
+  //   {
+  //     accessorFn: (row) => row.contactDetails?.location || "—",
+  //     id: "location",
+  //     header: "Location",
+  //   },
+  //   {
+  //     accessorFn: (row) => row.contactDetails?.phone || "—",
+  //     id: "phone",
+  //     header: "Phone",
+  //   },
+  //   {
+  //     accessorKey: "createdAt",
+  //     header: "Added on",
+  //     cell: ({ getValue }) => {
+  //       const value = getValue();
 
-        return (
-          <Box
-            style={{
-              borderRadius: "4px",
-              padding: "4px",
-              whiteSpace: "nowrap",
-              direction: "ltr",
-              unicodeBidi: "embed",
-              textAlign: "right",
-            }}
-          >
-            {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
-          </Box>
-        );
-      },
-    },
-  ])
+  //       return (
+  //         <Box
+  //           style={{
+  //             borderRadius: "4px",
+  //             padding: "4px",
+  //             whiteSpace: "nowrap",
+  //             direction: "ltr",
+  //             unicodeBidi: "embed",
+  //             textAlign: "right",
+  //           }}
+  //         >
+  //           {value ? moment(value).format("DD-MM-YYYY hh:mm a") : "-"}
+  //         </Box>
+  //       );
+  //     },
+  //   },
+  // ])
+
+  // order matches the design: name, phone, location, added on
+  
+  const columns = useMemo(() => [
+    { accessorKey: "fullName", header: "Client name",
+      cell: ({ getValue }) => <span className="tc-strong">{getValue()}</span> },
+    { accessorFn: (row) => row.contactDetails?.phone || "—", id: "phone", header: "Phone" },
+    { accessorFn: (row) => row.contactDetails?.location || "—", id: "location", header: "Location" },
+    { accessorKey: "createdAt", header: "Added on",
+      cell: ({ getValue }) => <DateTimeCell value={getValue()} /> },
+  ], []);
+
 
   const customTableOptions = {
     renderRowActions: ({ row }) => {
@@ -193,32 +219,39 @@ function Clients() {
         })
         setOpened(false)
       }
-      window.location.reload()
+      setClientsData(prev => [...prev, res.data.newClient])
+      // window.location.reload()
     } catch (error) {
       showNotification({
         title: 'Error creating a merchant',
-        message: error,
+        message: error.message,
         color: 'red'
       })
     }
   }
 
   const handleDeleteMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
+    const confirmDialog = window.confirm("هل أنت متأكد من حذف هذا العميل؟")
     if(!confirmDialog) return;
       try {
-        const clientId = row.original._id
-        console.log(clientId)
+        const clientId = row.original._id;
+        
         const url = `${BASE_URL}/clients/delete/${clientId}`
-        const res = await axios.delete(url)
+        const res = await axios.delete(url);
+
         if(res.status === 200) {
+          setClientsData(prev =>
+            prev.filter(client => client._id !== clientId)
+          );
+
           showNotification({
             title: "Success",
             message: "Merchant successfully deleted",
             color: "green"
           })
         }
-        window.location.reload()
+        
+        // window.location.reload()
     } catch (error) {
       showNotification({
         title: "Error",
@@ -228,68 +261,146 @@ function Clients() {
     }
   }
   
-  const handleEditMerchant = async (row) => {
-    const confirmDialog = window.confirm("هل أنت متأكد من حذف عملية البيع هذه؟")
-    if(!confirmDialog) return;
-      try {
-        const id = row.original._id
-        console.log(id)
-        const url = `${BASE_URL}/clients/edit/${id}`
-        const res = await axios.put(url)
-        if(res.status === 200) {
-          showNotification({
-            title: "Success",
-            message: "Merchant details successfully updated",
-            color: "green"
-          })
-        }
-        window.location.reload()
-    } catch (error) {
-      showNotification({
-        title: "Error",
-        message: "Error occured while updating merchant details",
-        color: "red"
-      })
-    }
-  }
+  const handleEditClick = (client) => {
+    setEditingClientId(client._id);
+    setEditForm({
+      name: client.fullName ?? '',
+      phone: client.contactDetails?.phone ?? '',
+      location: client.contactDetails?.location ?? '',
+      email: client.contactDetails?.email ?? '',
+    });
+    setEditOpened(true);
+  };
 
+  const handleEditChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const closeEditModal = () => {
+    setEditOpened(false);
+    setEditingClientId(null);
+  };
+
+  const submitEditForm = async () => {
+    if (!editForm.name.trim()) {
+      showNotification({
+        title: 'Error',
+        message: 'Client name is required',
+        color: 'red',
+      });
+      return;
+    }
+
+    const payload = {
+      fullName: editForm.name.trim(),
+      contactDetails: {
+        phone: editForm.phone,
+        location: editForm.location,
+        email: editForm.email,
+      },
+    };
+
+    try {
+      setEditSubmitting(true);
+      const clientId = editingClientId;
+      const url = `${BASE_URL}/clients/edit/${clientId}`;
+      const res = await axios.put(url, payload);
+
+      if (res.status === 200) {
+        setClientsData((prev) =>
+          prev.map((c) =>
+            c._id === editingClientId
+              ? {
+                  ...c,
+                  fullName: payload.fullName,
+                  contactDetails: {
+                    ...(c.contactDetails ?? {}),
+                    ...payload.contactDetails,
+                  },
+                }
+              : c
+          )
+        );
+        closeEditModal();
+        showNotification({
+          title: 'Success',
+          message: 'Client details successfully updated',
+          color: 'green',
+        });
+      } else {
+        showNotification({
+          title: 'Error',
+          message: `Unexpected response status: ${res.status}`,
+          color: 'red',
+        });
+      }
+    } catch (error) {
+      const data = error.response?.data;
+      const message =
+        (typeof data === 'string' && data) ||
+        data?.message ||
+        data?.error ||
+        error.message;
+      showNotification({
+        title: 'Error updating client',
+        message,
+        color: 'red',
+      });
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  // const actionsColumn = {
+  //   id: "actions",
+  //   header: () => <Box ta="center">Actions</Box>,
+
+  //   cell: ({ row }) => (
+  //     <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+        
+  //       {/* EDIT */}
+  //       <Tooltip label="Edit" >
+  //         <ActionIcon 
+  //           variant="light"
+  //           color="blue"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleEditClick(row.original)
+  //           }}
+  //         >
+  //           <IconEdit size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
+
+  //       {/* DELETE */}
+  //       <Tooltip label="Delete">
+  //         <ActionIcon
+  //           variant="light"
+  //           color="red"
+  //           onClick={(e) => {
+  //             e.stopPropagation(e);
+  //             handleDeleteMerchant(row)
+  //           }}
+  //         >
+  //           <IconTrash size={26} />
+  //         </ActionIcon>
+  //       </Tooltip>
+  //     </Group>
+  //   ),
+  // };
+
+  
   const actionsColumn = {
     id: "actions",
-    header: () => <Box ta="center">Actions</Box>,
-
+    header: "Actions",
     cell: ({ row }) => (
-      <Group gap="lg" justify="start" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
-        
-        {/* EDIT */}
-        <Tooltip label="Edit" >
-          <ActionIcon 
-            variant="light"
-            color="blue"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleActionClick(row.original._id)
-            }}
-          >
-            <IconEdit size={26} />
-          </ActionIcon>
-        </Tooltip>
-
-        {/* DELETE */}
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="light"
-            color="red"
-            onClick={(e) => {
-              e.stopPropagation(e);
-              handleDeleteMerchant(row)
-            }}
-          >
-            <IconTrash size={26} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+      <RowActions
+        onEdit={() => handleEditClick(row.original)}
+        onDelete={() => handleDeleteMerchant(row)}
+      />
     ),
   };
+
 
   const customToolbarOptions = {
     
@@ -297,33 +408,18 @@ function Clients() {
 
   return (
     <Container size="100%">
-      <Button mb='sm' color="green" onClick={() => setOpened(!opened)}>Add Client</Button>
-      {/* <CustomTable 
-        columns={columns} 
-        data={clientsSeed}
-        // renderTopToolbarCustomActions={customTableOptions.renderTopToolbarCustomActions}
-        renderRowActions={customTableOptions.renderRowActions}
-        // onRowSelectionChange={customTableOptions.onRowSelectionChange}
-        onRowClick={(row) => setSelectedResult(row)}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-        checkedRow={checkedRow}
-        setCheckedRow={setCheckedRow}
-      />
-      <Box my={80}>
+      {/* <Button mb='sm' variant="filled" color="green" aria-label="create client" size="lg" radius={12} onClick={() => setOpened(!opened)}>Add Client</Button> */}
 
-      </Box> */}
+      <PageHeader
+        title="Clients"
+        subtitle={`${clientsData.length} clients`}
+        actionLabel="Add client"
+        onAction={() => setOpened(true)}
+      />
+
       <TanStackTable
         data={clientsData}
         columns={columns}
-        renderRowActions={(row) => (
-          <>
-            <Button size="xs">Edit</Button>
-            <Button size="xs" color="red">
-              Delete
-            </Button>
-          </>
-        )}
         actionsColumn={actionsColumn}
         customToolbarOptions={customToolbarOptions}
         onSelectionChange={setCheckedRow}
@@ -336,10 +432,18 @@ function Clients() {
         handleChange={handleChange} 
         submitClientForm={submitClientForm}
       />
+      <EditClientModal
+        opened={editOpened}
+        onClose={closeEditModal}
+        editForm={editForm}
+        handleChange={handleEditChange}
+        onSubmit={submitEditForm}
+        loading={editSubmitting}
+      />
       {
         loading &&
         <Center>
-          <Loader size={36} color="green" variant='dots' />
+          <Loader size={36} type='dots' color="green" />
         </Center>
       }
     </Container>

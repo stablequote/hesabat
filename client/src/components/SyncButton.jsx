@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Group, Text, Badge } from "@mantine/core";
 import { IconCloudUpload, IconCloudDownload } from "@tabler/icons-react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const SyncButton = () => {
   const [pushing, setPushing]   = useState(false);
@@ -11,6 +12,7 @@ const SyncButton = () => {
 
   const token = localStorage.getItem("authToken");
   const BASE_URL = import.meta.env.VITE_URL;
+  const { t } = useTranslation();
 
   const pushToCloud = async () => {
     try {
@@ -55,7 +57,7 @@ const SyncButton = () => {
         loading={pulling}
         onClick={pullFromCloud}
       >
-        سحب الأسعار
+       {t("PULL-PRICES")}
       </Button>
 
       <Button
@@ -65,7 +67,7 @@ const SyncButton = () => {
         loading={pushing}
         onClick={pushToCloud}
       >
-        رفع البيانات
+        {t("UPLOAD-DATA")}
       </Button>
     </Group>
   );

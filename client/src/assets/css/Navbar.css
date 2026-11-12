@@ -1,0 +1,108 @@
+/* Navbar.css: dark sidebar with the logo on top, grouped links, sign out pinned to the bottom. */
+
+.hs-nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  color: #dbe4f5;
+}
+
+.hs-nav__logo {
+  flex: none;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding-inline: 23px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--hs-orange);
+}
+
+.hs-nav__list {
+  padding-inline: 11px;
+}
+
+.hs-nav__label {
+  margin: 18px 0 6px;
+  padding-inline: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8fa6d0;
+}
+/* letter-spacing would break Arabic letter joining */
+.hs-nav__label:lang(ar) {
+  letter-spacing: 0;
+}
+
+.hs-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  margin-bottom: 2px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #dbe4f5;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.hs-nav__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.hs-nav__item:focus-visible {
+  outline: 2px solid #4dabf7;
+  outline-offset: -2px;
+}
+.hs-nav__icon {
+  flex: none;
+  color: #b9c8e6;
+}
+
+.hs-nav__item.is-active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 600;
+}
+.hs-nav__item.is-active .hs-nav__icon {
+  color: #fff;
+}
+/* blue marker flush with the sidebar edge */
+.hs-nav__item.is-active::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -11px;
+  top: 50%;
+  width: 4px;
+  height: 26px;
+  transform: translateY(-50%);
+  background: #4dabf7;
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
+}
+
+.hs-nav__signout {
+  margin: auto 11px 0;
+  color: #ff8b7a;
+}
+.hs-nav__signout .hs-nav__icon {
+  color: #ff8b7a;
+}
+.hs-nav__signout:hover {
+  background: rgba(255, 139, 122, 0.12);
+  color: #ffa597;
+}

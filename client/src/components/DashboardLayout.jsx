@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
-import { AppShell, Box, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { Outlet } from 'react-router-dom';
-import AppNavbar from './Navbar';
-import DashboardHeader from './DashboardHeader';
+import { useEffect, useState } from "react";
+import { AppShell } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Outlet } from "react-router-dom";
+import AppNavbar from "./Navbar";
+import DashboardHeader from "./DashboardHeader";
+import "../assets/css/DashboardLayout.css";
+
+const NAV_WIDTH = 240;
 
 function DashboardLayout({ changeLanguage, value }) {
   const [opened, { toggle, close }] = useDisclosure(false);
@@ -40,15 +43,17 @@ function DashboardLayout({ changeLanguage, value }) {
 
   return (
     <AppShell
-      padding="md"
+      className="hs-shell"
+      layout="alt" /* sidebar runs the full height; the header sits beside it */
+      padding={{ base: "md", sm: 30 }}
       header={{ height: 60 }}
       navbar={{
-        width: 250,
-        breakpoint: 'sm',
+        width: NAV_WIDTH,
+        breakpoint: "sm",
         collapsed: { mobile: !opened },
       }}
     >
-      <AppShell.Header>
+      <AppShell.Header className="hs-header-shell">
         <DashboardHeader
           changeLanguage={changeLanguage}
           value={value}
@@ -58,12 +63,12 @@ function DashboardLayout({ changeLanguage, value }) {
         />
       </AppShell.Header>
 
-      <AppShell.Navbar bg="#0e356d">
+      <AppShell.Navbar className="hs-nav-shell">
         {/* Close drawer when a nav link is clicked on mobile */}
         <AppNavbar onNavigate={close} />
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main className="hs-main">
         <Outlet />
       </AppShell.Main>
     </AppShell>
