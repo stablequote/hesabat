@@ -20,6 +20,7 @@
     "@tabler/icons-react": "^3.29.0",
     "@tanstack/react-table": "^8.21.3",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.1.0",
     "axios": "^1.7.9",
     "chart.js": "^4.4.7",
     "export-to-csv": "^1.4.0",
