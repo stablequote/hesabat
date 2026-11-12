@@ -48,6 +48,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { useTranslation } from "react-i18next";
  
 // ─── Responsive hook ────────────────────────────────────────────────────────
 const useIsMobile = () => {
@@ -104,6 +105,7 @@ const Overview = () => {
  
   const BASE_URL = import.meta.env.VITE_URL;
   const token = localStorage.getItem("authToken");
+  const { t } = useTranslation();
  
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchOverview = async () => {
@@ -220,12 +222,11 @@ const Overview = () => {
               c="dark"
               style={{ lineHeight: 1.2 }}
             >
-              Business Overview
+              {t("BUSINESS-OVERVIEW")}
             </Text>
             {!isMobile && (
               <Text c="dimmed" mt={4} size="sm">
-                Financial analytics, sales metrics, revenue tracking, and
-                expenses.
+                {t("OVERVIEW-SUBTITLE")}
               </Text>
             )}
           </div>
@@ -238,7 +239,7 @@ const Overview = () => {
               size="lg"
               radius="xl"
               onClick={() => setFilterOpen((o) => !o)}
-              aria-label="Toggle filters"
+              aria-label={t("TOGGLE-FILTERS")}
             >
               <IconFilter size={18} />
             </ActionIcon>
@@ -246,7 +247,7 @@ const Overview = () => {
             <Group align="flex-end" gap="sm">
               <DatePickerInput
                 type="range"
-                placeholder="اختر نطاق التاريخ"
+                placeholder={t("SELECT-DATE-RANGE")}
                 value={dateRange}
                 onChange={setDateRange}
                 radius="xl"
@@ -261,16 +262,16 @@ const Overview = () => {
                 onClick={() => generateReport({ filtered: true })}
                 loading={generatingFiltered}
                 disabled={!hasDateRange}
-                title={!hasDateRange ? "اختر نطاق تاريخ أولاً" : ""}
+                title={!hasDateRange ? t("SELECT-DATE-RANGE-FIRST") : ""}
               >
-                تقرير مفلتر
+                {t("FILTERED-REPORT")}
               </Button>
               <Button
                 radius="xl"
                 onClick={() => generateReport({ filtered: false })}
                 loading={generatingFull}
               >
-                التقرير الكامل
+                 {t("FULL-REPORT")}
               </Button>
             </Group>
           )}
@@ -281,11 +282,11 @@ const Overview = () => {
           <Collapse in={filterOpen}>
             <Card radius="xl" shadow="sm" withBorder p="md" mt="sm">
               <Text size="sm" fw={600} mb="xs" c="dimmed">
-                Generate Report
+                {t("GENERATE-REPORT")}
               </Text>
               <DatePickerInput
                 type="range"
-                placeholder="اختر نطاق التاريخ"
+                placeholder={t("SELECT-DATE-RANGE")}
                 value={dateRange}
                 onChange={setDateRange}
                 radius="xl"
@@ -304,7 +305,7 @@ const Overview = () => {
                   disabled={!hasDateRange}
                   size="sm"
                 >
-                  تقرير مفلتر
+                  {t("FILTERED-REPORT")}
                 </Button>
                 <Button
                   radius="xl"
@@ -312,7 +313,7 @@ const Overview = () => {
                   loading={generatingFull}
                   size="sm"
                 >
-                  التقرير الكامل
+                  {t("FULL-REPORT")}
                 </Button>
               </Group>
             </Card>
@@ -325,29 +326,29 @@ const Overview = () => {
         <MetricCard
           icon={IconCash}
           color="green"
-          badge="Revenue"
-          label="Total Sales"
+          badge={t("REVENUE")}
+          label={t("TOTAL-SALES")}
           value={formatCurrency(overview.totalSales)}
         />
         <MetricCard
           icon={IconWallet}
           color="orange"
-          badge="Expenses"
-          label="Total Expenses"
+          badge={t("EXPENSES")}
+          label={t("TOTAL-EXPENSES")}
           value={formatCurrency(overview.totalExpenses)}
         />
         <MetricCard
           icon={IconShoppingCart}
           color="blue"
-          badge="Pending"
-          label="Pending Sales"
+          badge={t("PENDING")}
+          label={t("PENDING-SALES")}
           value={formatCurrency(overview.pendingSalesPayments)}
         />
         <MetricCard
           icon={IconAlertCircle}
           color="red"
-          badge="Purchases"
-          label="Pending Purchases"
+          badge={t("PURCHASES")}
+          label={t("PENDING-PURCHASES")}
           value={formatCurrency(overview.pendingPurchasePayments)}
         />
       </SimpleGrid>
@@ -369,10 +370,10 @@ const Overview = () => {
           <Group justify="space-between" mb="md">
             <div>
               <Text fw={700} size="lg">
-                Monthly Sales
+                {t("MONTHLY-SALES")}
               </Text>
               <Text c="dimmed" size="xs">
-                Monthly revenue overview
+                {t("MONTHLY-REVENUE-OVERVIEW")}
               </Text>
             </div>
             <ThemeIcon size={40} radius="xl" color="blue">
@@ -401,12 +402,12 @@ const Overview = () => {
         {/* Financial summary */}
         <Card radius="xl" shadow="md" withBorder p="lg">
           <Text fw={700} size="lg" mb="lg">
-            Financial Summary
+            {t("FINANCIAL-SUMMARY")}
           </Text>
           <Stack gap="sm">
             <Card radius="xl" bg="green.0" p="md">
               <Text c="dimmed" size="xs">
-                Net Profit
+                {t("NET-PROFIT")}
               </Text>
               <Text fw={800} size="1.4rem" c="green">
                 {formatCurrency(overview.totalSales - overview.totalExpenses)}
@@ -414,7 +415,7 @@ const Overview = () => {
             </Card>
             <Card radius="xl" bg="orange.0" p="md">
               <Text c="dimmed" size="xs">
-                Pending Installments
+                {t("PENDING-INSTALLMENTS")}
               </Text>
               <Text fw={800} size="1.4rem" c="orange">
                 {formatCurrency(overview.pendingSalesPayments)}
@@ -422,7 +423,7 @@ const Overview = () => {
             </Card>
             <Card radius="xl" bg="blue.0" p="md">
               <Text c="dimmed" size="xs">
-                Recent Sales
+                {t("RECENT-SALES")}
               </Text>
               <Text fw={800} size="1.4rem" c="blue">
                 {overview.recentSales.length}
@@ -438,7 +439,7 @@ const Overview = () => {
         <Card radius="xl" shadow="md" withBorder p="lg">
           <Group justify="space-between" mb="lg">
             <Text fw={700} size="lg">
-              Top Selling Products
+              {t("TOP-SELLING-PRODUCTS")}
             </Text>
             <ThemeIcon radius="xl" size={38} color="grape">
               <IconPackage size={18} />
@@ -453,7 +454,7 @@ const Overview = () => {
                       {item.name}
                     </Text>
                     <Text size="xs" c="dimmed">
-                      {item.totalQty} units sold
+                      {item.totalQty} {t("UNITS-SOLD")}
                     </Text>
                   </div>
                 </Group>
@@ -471,7 +472,7 @@ const Overview = () => {
         <Card radius="xl" shadow="md" withBorder p="lg">
           <Group justify="space-between" mb="lg">
             <Text fw={700} size="lg">
-              Recent Sales
+              {t("RECENT-SALES")}
             </Text>
             <ThemeIcon radius="xl" size={38} color="cyan">
               <IconReportAnalytics size={18} />
@@ -498,7 +499,7 @@ const Overview = () => {
                       radius="xl"
                       size="sm"
                     >
-                      {sale.status}
+                      {t(sale.status)}
                     </Badge>
                   </Group>
                   <Text size="xs" c="dimmed">
@@ -515,10 +516,10 @@ const Overview = () => {
             <Table highlightOnHover verticalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Invoice</Table.Th>
-                  <Table.Th>Client</Table.Th>
-                  <Table.Th>Amount</Table.Th>
-                  <Table.Th>Status</Table.Th>
+                  <Table.Th>{t("INVOICE")}</Table.Th>
+                  <Table.Th>{t("CLIENT")}</Table.Th>
+                  <Table.Th>{t("AMOUNT")}</Table.Th>
+                  <Table.Th>{t("STATUS")}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -538,7 +539,7 @@ const Overview = () => {
                         }
                         radius="xl"
                       >
-                        {sale.status}
+                        {t(sale.status)}
                       </Badge>
                     </Table.Td>
                   </Table.Tr>
@@ -554,10 +555,10 @@ const Overview = () => {
         <Group justify="space-between" mb="lg">
           <div>
             <Text fw={700} size="lg">
-              Daily Sales Analytics
+              {t("DAILY-SALES-ANALYTICS")}
             </Text>
             <Text c="dimmed" size="xs">
-              Overall daily business performance
+              {t("OVERALL-DAILY-PERFORMANCE")}
             </Text>
           </div>
           <ThemeIcon size={42} radius="xl" color="teal">
