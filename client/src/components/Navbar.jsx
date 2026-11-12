@@ -15,36 +15,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "../assets/css/Navbar.css";
 
-// Same routes, translation keys and role rules as before, now in one list.
-// `label` is [translation key, English fallback]; groups without a label have no heading.
-const NAV = [
-  {
-    items: [
-      { to: "/overview", key: "OVERVIEW", icon: IconLayoutGrid, ownerOnly: true },
-      { to: "/clients", key: "CLIENTS", icon: IconUsers },
-      { to: "/vendors", key: "VENDORS", icon: IconBuildingStore },
-    ],
-  },
-  {
-    label: ["NAV-INVOICES", "Invoices"],
-    items: [
-      { to: "/sale-invoices", key: "SALE-INVOICES", icon: IconFileExport },
-      { to: "/purchase-invoices", key: "PURCHASE-INVOICES", icon: IconShoppingBag, ownerOnly: true },
-    ],
-  },
-  {
-    label: ["NAV-FINANCE", "Finance"],
-    items: [
-      { to: "/ledger", key: "LEDGER", icon: IconBook2, ownerOnly: true },
-      { to: "/expenses", key: "EXPENSES", icon: IconWallet },
-      { to: "/cashout", key: "CASHOUT", icon: IconCash },
-    ],
-  },
-  {
-    label: ["NAV-INVENTORY", "Inventory"],
-    items: [{ to: "/products", key: "PRODUCTS", icon: IconBox }],
-  },
-];
+
 
 const readRole = () => {
   try {
@@ -58,6 +29,37 @@ const AppNavbar = ({ onNavigate }) => {
   const { logout } = useAuth();
   const { t } = useTranslation();
   const role = readRole();
+
+  // Same routes, translation keys and role rules as before, now in one list.
+  // `label` is [translation key, English fallback]; groups without a label have no heading.
+  const NAV = [
+    {
+      items: [
+        { to: "/overview", key: "OVERVIEW", icon: IconLayoutGrid, ownerOnly: true },
+        { to: "/clients", key: "CLIENTS", icon: IconUsers },
+        { to: "/vendors", key: "VENDORS", icon: IconBuildingStore },
+      ],
+    },
+    {
+      label: ["NAV-INVOICES", t("Invoices")],
+      items: [
+        { to: "/sale-invoices", key: "SALE-INVOICES", icon: IconFileExport },
+        { to: "/purchase-invoices", key: "PURCHASE-INVOICES", icon: IconShoppingBag, ownerOnly: true },
+      ],
+    },
+    {
+      label: ["NAV-FINANCE", t("Finance")],
+      items: [
+        { to: "/ledger", key: "LEDGER", icon: IconBook2, ownerOnly: true },
+        { to: "/expenses", key: "EXPENSES", icon: IconWallet },
+        { to: "/cashout", key: "CASHOUT", icon: IconCash },
+      ],
+    },
+    {
+      label: ["NAV-INVENTORY", t("Inventory")],
+      items: [{ to: "/products", key: "PRODUCTS", icon: IconBox }],
+    },
+  ];
 
   const groups = NAV.map((g) => ({
     ...g,
