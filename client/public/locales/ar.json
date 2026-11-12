@@ -238,5 +238,7 @@
     "INSTALLMENT-CHECK-TITLE": "تحقق من الدفعة",
     "INSTALLMENT-ERR-AMOUNT": "أدخل مبلغاً أكبر من صفر.",
     "INSTALLMENT-ERR-EXCEEDS": "المبلغ المدخل أكبر من الرصيد المتبقي.",
-    "INSTALLMENT-ERR-BANKAK": "أدخل رقم عملية بنكك."
+    "INSTALLMENT-ERR-BANKAK": "أدخل رقم عملية بنكك.",
+    "PULL-PRICES": "تحديث الأسعار",
+    "UPLOAD-DATA": "رفع البيانات"
 }

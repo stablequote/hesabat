@@ -230,5 +230,7 @@
     "INSTALLMENT-CHECK-TITLE": "Check the payment",
     "INSTALLMENT-ERR-AMOUNT": "Enter a payment amount greater than zero.",
     "INSTALLMENT-ERR-EXCEEDS": "The payment exceeds the remaining balance.",
-    "INSTALLMENT-ERR-BANKAK": "Enter the Bankak transaction number."
+    "INSTALLMENT-ERR-BANKAK": "Enter the Bankak transaction number.",
+    "PULL-PRICES": "Pull Prices",
+    "UPLOAD-DATA": "Upload Data"
 }
