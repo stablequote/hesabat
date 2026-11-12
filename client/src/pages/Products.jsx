@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Container, Flex, Image, Title, Box, Button, Tooltip, ActionIcon, Group, Avatar, Badge, Stack, Text } from '@mantine/core';
+import { Container, Flex, Image, Title, Box, Button, Tooltip, ActionIcon, Group, Avatar, Badge, Stack, Text, Center, Loader } from '@mantine/core';
 import { IconBarrel, IconBookmarkEdit, IconDownload, IconEdit, IconHistory, IconPlus, IconReportMedical, IconTrash, IconUpload } from '@tabler/icons-react';
 import axios from 'axios';
 import moment from 'moment';
@@ -185,11 +185,22 @@ function Products() {
   };
 
   const fetchProducts = async (url) => {
-    const res = await axios.get(url);
-    console.log(res)
-    setLoading(!loading)
-    setData(res.data.products)
-    console.log(res.data)
+    setLoading(true);
+    try {
+      const res = await axios.get(url);
+      if(res.status === 200) {
+        setData(res.data.products)
+      }
+    } catch (error) {
+      showNotification({
+        title: "Errro",
+        message: error.message,
+        color: "red"
+      })
+    } finally {
+      setLoading(false);
+    }
+    
   }
 
   useEffect(()=> {
@@ -409,6 +420,12 @@ function Products() {
         onSubmit={submitEdit}
         loading={editSubmitting}
       />
+      {
+        loading && 
+        <Center>
+          <Loader size={36} type="dots" color="green" />
+        </Center>
+      }
     </Container>
   )
 }
