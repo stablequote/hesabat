@@ -389,7 +389,7 @@ function Vendors() {
       {
         loading &&
         <Center>
-          <Loader size={36} color="green" variant='dots' />
+          <Loader size={36} type="dots" color="green" />
         </Center>
       }
     </Container>

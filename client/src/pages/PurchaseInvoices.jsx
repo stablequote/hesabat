@@ -490,7 +490,7 @@ const PurchaseInvoices = () => {
       {
         loading && 
         <Center>
-          <Loader size={36} variant="dots" color="green" />
+          <Loader size={36} type="dots" color="green" />
         </Center>
       }
     </Box>
