@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useTranslation } from "react-i18next";
@@ -20,13 +20,37 @@ import Overview from './pages/Overview';
 // import Clients from './pages/Clients';
 
 import DashboardLayout from './components/DashboardLayout';
+import { useDirection } from '@mantine/core';
 
 function App() {
   const { t, i18n } = useTranslation();
+  const { setDirection } = useDirection();
   
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
+
+  // change layout direction dynamically according to selected language
+//   useEffect(() => {
+//   const language = i18n.resolvedLanguage || i18n.language;
+//   const direction = language === "ar" ? "rtl" : "ltr";
+
+//   document.documentElement.lang = language;
+//   document.documentElement.dir = direction;
+
+//   document.body.dir = direction;
+// }, [i18n.language, i18n.resolvedLanguage]);
+
+  // v2 of language switcher ==> chnages both page layout and components direction 
+  useEffect(() => {
+    const language = i18n.resolvedLanguage || i18n.language;
+    const direction = language.startsWith("ar") ? "rtl" : "ltr";
+
+    document.documentElement.lang = language;
+    document.documentElement.dir = direction;
+
+    setDirection(direction);
+  }, [i18n.language, i18n.resolvedLanguage, setDirection]);
 
   return (
     <Router>
