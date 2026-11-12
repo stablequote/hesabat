@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { ActionIcon, Box, Button, Flex, Group, Modal, Tooltip } from '@mantine/core';
+import { ActionIcon, Box, Button, Center, Flex, Group, Loader, Modal, Tooltip } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { IconDoorExit, IconEdit, IconHistory, IconMedicalCrossCircle, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
@@ -18,6 +18,7 @@ import AddClientModal from '../components/AddClientModal';
 const SaleInvoices = () => {
   const [invoicesData, setInvoicesData] = useState([]);
   const [opened, setOpened] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
   const [clientsData, setClientsData] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -132,6 +133,7 @@ const SaleInvoices = () => {
   };
 
   const fetchInvoices = async () => {    
+    setLoading(true)
     try {
       const url = `${BASE_URL}/sale-invoices/list`;
       const response = await axios.get(url, {
@@ -144,6 +146,8 @@ const SaleInvoices = () => {
       console.log(invoicesData)
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -487,6 +491,12 @@ const SaleInvoices = () => {
         handleChange={handleChange} 
         submitClientForm={submitClientForm}
       />
+      {
+        loading && 
+        <Center>
+          <Loader size={36} type="dots" color="green" />
+        </Center>
+      }
     </Box>
   );
 };
